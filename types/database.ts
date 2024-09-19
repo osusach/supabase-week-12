@@ -61,6 +61,41 @@ export type Database = {
         }
         Relationships: []
       }
+      states: {
+        Row: {
+          abbreviation: string | null
+          country_id: number
+          created_at: string
+          id: number
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          abbreviation?: string | null
+          country_id: number
+          created_at?: string
+          id?: number
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          abbreviation?: string | null
+          country_id?: number
+          created_at?: string
+          id?: number
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "states_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -77,7 +112,6 @@ export type Database = {
         | "Oceania"
         | "North America"
         | "South America"
-      institution_types: "Public" | "Private" | "Government" | "NGO"
     }
     CompositeTypes: {
       [_ in never]: never
