@@ -93,6 +93,56 @@ export type Database = {
         }
         Relationships: []
       }
+      institutions: {
+        Row: {
+          abbreviation: string | null
+          address: string | null
+          city_id: number
+          created_at: string
+          funding_type: Database["public"]["Enums"]["institution_funding_type"]
+          id: number
+          image_url: string | null
+          institution_category: Database["public"]["Enums"]["institution_category"]
+          name: string
+          updated_at: string | null
+          website_url: string | null
+        }
+        Insert: {
+          abbreviation?: string | null
+          address?: string | null
+          city_id: number
+          created_at?: string
+          funding_type: Database["public"]["Enums"]["institution_funding_type"]
+          id?: number
+          image_url?: string | null
+          institution_category: Database["public"]["Enums"]["institution_category"]
+          name: string
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          abbreviation?: string | null
+          address?: string | null
+          city_id?: number
+          created_at?: string
+          funding_type?: Database["public"]["Enums"]["institution_funding_type"]
+          id?: number
+          image_url?: string | null
+          institution_category?: Database["public"]["Enums"]["institution_category"]
+          name?: string
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "institutions_cities_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       states: {
         Row: {
           abbreviation: string | null
@@ -144,6 +194,9 @@ export type Database = {
         | "Oceania"
         | "North America"
         | "South America"
+      institution_category: "university" | "ngo" | "government" | "other"
+      institution_funding_type: "public" | "private" | "mixed" | "other"
+      institution_types: "university" | "ngo" | "government" | "other"
     }
     CompositeTypes: {
       [_ in never]: never
