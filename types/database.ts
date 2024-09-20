@@ -34,6 +34,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      cities: {
+        Row: {
+          created_at: string
+          id: number
+          name: string
+          state_id: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          name: string
+          state_id: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          name?: string
+          state_id?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cities_state_id_fkey"
+            columns: ["state_id"]
+            isOneToOne: false
+            referencedRelation: "states"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       countries: {
         Row: {
           continent: Database["public"]["Enums"]["continents"] | null
