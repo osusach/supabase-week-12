@@ -20,8 +20,8 @@ jobs:
 
       - name: Verify generated types are checked in
         env:
-          SUPABASE_AUTH_GOOGLE_CLIENT_ID:
-          SUPABASE_AUTH_GOOGLE_SECRET:
+          SUPABASE_AUTH_GOOGLE_CLIENT_ID: " "
+          SUPABASE_AUTH_GOOGLE_SECRET: " "
         run: |
           supabase gen types typescript --local > types.gen.ts
           if ! git diff --ignore-space-at-eol --exit-code --quiet types.gen.ts; then
