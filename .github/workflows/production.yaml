@@ -6,6 +6,10 @@ on:
       - master
   workflow_dispatch:
 
+env:
+  SUPABASE_AUTH_GOOGLE_CLIENT_ID: " "
+  SUPABASE_AUTH_GOOGLE_SECRET: " "
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
