@@ -29,7 +29,7 @@ export default async function Index() {
         </div>
         <div>
           <Button asChild variant={"secondary"}>
-            <Link href={"/"}>Sign in</Link>
+            <Link href={"/sign-in"}>Sign in</Link>
           </Button>
         </div>
       </header>
