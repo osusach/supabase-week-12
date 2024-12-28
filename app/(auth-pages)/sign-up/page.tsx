@@ -1,16 +1,23 @@
+import Link from "next/link";
+import { use } from "react";
+
 import { signUpAction } from "@/app/actions";
 import { FormMessage, Message } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
 import { SmtpMessage } from "../smtp-message";
 
-export default function Signup({ searchParams }: { searchParams: Message }) {
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
+
+export default function Signup(props: { searchParams: SearchParams }) {
+  const searchParams = use(props.searchParams);
+
+
   if ("message" in searchParams) {
     return (
       <div className="w-full flex-1 flex items-center h-screen sm:max-w-md justify-center gap-2 p-4">
-        <FormMessage message={searchParams} />
+        <FormMessage message={searchParams as Message} />
       </div>
     );
   }
@@ -36,10 +43,12 @@ export default function Signup({ searchParams }: { searchParams: Message }) {
             minLength={6}
             required
           />
-          <SubmitButton formAction={signUpAction} pendingText="Signing up...">
+          <SubmitButton formAction={async (formData) => {
+            signUpAction(formData);
+          }} pendingText="Signing up...">
             Sign up
           </SubmitButton>
-          <FormMessage message={searchParams} />
+          <FormMessage message={searchParams as Message} />
         </div>
       </form>
       <SmtpMessage />
