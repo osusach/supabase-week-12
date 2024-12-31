@@ -43,7 +43,9 @@ on the devices and browsers this has been tested on, as well as any relevant
 images for UI changes._
 
 ### UI accessibility checklist
+
 _If your PR includes UI changes, please utilize this checklist:_
+
 - [ ] Semantic HTML implemented?
 - [ ] Keyboard operability supported?
 - [ ] Color contrast tested?
