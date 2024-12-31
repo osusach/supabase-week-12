@@ -3,7 +3,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbo",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "build": "next build",
