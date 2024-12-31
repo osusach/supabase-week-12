@@ -4,6 +4,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "next dev",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
