@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
+const protectedRoutes = ["/dashboard", "/get-started"];
+
 export const updateSession = async (request: NextRequest) => {
   try {
     let response = NextResponse.next({
@@ -33,8 +35,11 @@ export const updateSession = async (request: NextRequest) => {
     );
 
     const user = await supabase.auth.getUser();
+    const isProtectedRoute = protectedRoutes.some((route) =>
+      request.nextUrl.pathname.startsWith(route),
+    );
 
-    if (request.nextUrl.pathname.startsWith("/dashboard") && user.error) {
+    if (isProtectedRoute && user.error) {
       return NextResponse.redirect(new URL("/sign-in", request.url));
     }
 
