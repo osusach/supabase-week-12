@@ -1,26 +1,46 @@
 "use client";
 
 import {
+  CalendarIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   GraduationCapIcon,
   RocketIcon,
   UserIcon,
 } from "lucide-react";
+import { format, getMonth, getYear, setMonth, setYear } from "date-fns";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { cn, months } from "@/lib/utils";
 
 const onboardingSteps = [
   { icon: UserIcon, label: "Basic Information" },
@@ -28,10 +48,67 @@ const onboardingSteps = [
   { icon: RocketIcon, label: "Career & Personal Interests" },
 ];
 
+const onboardingSchema = z.object({
+  academicBackground: z.object({
+    educationLevel: z.enum(["High School", "Undergraduate"]),
+    currentOrLastInstitution: z.string().optional(),
+    fieldOfStudyId: z.coerce.number().optional(),
+    graduationYear: z.coerce.number().optional(),
+    intendedFieldOfStudyId: z.coerce.number().optional(),
+  }),
+  basicInformation: z.object({
+    cityId: z.coerce.number(),
+    countryId: z.coerce.number(),
+    dateOfBirth: z.coerce.date(),
+    firstName: z.string(),
+    gender: z.enum(["Female", "Male", "Other"]).optional(),
+    lastName: z.string(),
+    stateId: z.coerce.number(),
+  }),
+  personalInterests: z.object({
+    extracurricularsIds: z.array(z.coerce.number()).optional(),
+    additionalNotes: z.string().optional(),
+  }),
+});
+
 export default function OnboardingForm() {
+  const [birthDate, setBirthDate] = useState<Date>(new Date());
   const [currentStep, setCurrentStep] = useState<number>(0);
 
-  const form = useForm();
+  const endYear = getYear(new Date());
+  const startYear = getYear(new Date()) - 100;
+  const years = Array.from(
+    { length: endYear - startYear + 1 },
+    (_, idx) => startYear + idx,
+  );
+
+  const form = useForm<z.infer<typeof onboardingSchema>>({
+    defaultValues: {
+      academicBackground: {
+        currentOrLastInstitution: "",
+      },
+      basicInformation: {
+        firstName: "",
+        lastName: "",
+      },
+      personalInterests: {
+        additionalNotes: "",
+        extracurricularsIds: [],
+      },
+    },
+    resolver: zodResolver(onboardingSchema),
+  });
+  const educationLevel = form.watch("academicBackground.educationLevel");
+
+  const handleMonthChange = (month: string) => {
+    const date = setMonth(birthDate, months.indexOf(month));
+    setBirthDate(date);
+  };
+
+  const handleYearChange = (year: string) => {
+    const date = setYear(birthDate, parseInt(year, 10));
+    setBirthDate(date);
+  };
 
   const handleNextStep = () => {
     if (currentStep === onboardingSteps.length - 1) return;
@@ -43,13 +120,13 @@ export default function OnboardingForm() {
     setCurrentStep((step) => step - 1);
   };
 
-  const onSubmit = (values: any) => {
+  const onSubmit = (values: z.infer<typeof onboardingSchema>) => {
     console.log(values);
   };
 
   return (
     <>
-      <nav aria-label={"Form progress"}>
+      <nav aria-label={"Form progress"} className={"mb-5"}>
         <ol className={"md:flex md:space-x-4"}>
           {onboardingSteps.map((step, idx) => (
             <li
@@ -68,7 +145,7 @@ export default function OnboardingForm() {
               >
                 <step.icon
                   className={cn(
-                    "h-8 w-8 text-slate-500",
+                    "h-8 w-8 text-muted-foreground",
                     idx <= currentStep && "text-blue-500",
                   )}
                 />
@@ -81,64 +158,430 @@ export default function OnboardingForm() {
         </ol>
       </nav>
       <Form {...form}>
-        <form className={"space-y-6"} onSubmit={form.handleSubmit(onSubmit)}>
-          <div className={"space-y-4"}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className={"space-y-5 md:space-y-10"}>
             {/* Basic Info step */}
             {currentStep === 0 && (
-              <div className={"grid grid-cols-1"}>
-                <FormField
-                  control={form.control}
-                  name={"field1"}
-                  render={({ field }) => (
-                    <FormItem className={"space-y-2"}>
-                      <FormLabel>Field 1</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <>
+                <div className={"grid grid-cols-1 gap-5 md:grid-cols-2"}>
+                  <FormField
+                    control={form.control}
+                    name={"basicInformation.firstName"}
+                    render={({ field }) => (
+                      <FormItem className={"space-y-2"}>
+                        <FormLabel>
+                          First name<span aria-hidden={true}>*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={"basicInformation.lastName"}
+                    render={({ field }) => (
+                      <FormItem className={"space-y-2"}>
+                        <FormLabel>
+                          Last name<span aria-hidden={true}>*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className={"grid grid-cols-1 gap-3 md:grid-cols-2"}>
+                  <FormField
+                    control={form.control}
+                    name={"basicInformation.stateId"}
+                    render={({ field }) => (
+                      <FormItem className={"space-y-2"}>
+                        <FormLabel>
+                          State<span aria-hidden={true}>*</span>
+                        </FormLabel>
+                        <Select
+                          defaultValue={field.value?.toString()}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue
+                                placeholder={"Please select a state"}
+                              />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value={"1"}>Option 1</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={"basicInformation.cityId"}
+                    render={({ field }) => (
+                      <FormItem className={"space-y-2"}>
+                        <FormLabel>
+                          City<span aria-hidden={true}>*</span>
+                        </FormLabel>
+                        <Select
+                          defaultValue={field.value?.toString()}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue
+                                placeholder={"Please select a city"}
+                              />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value={"1"}>Option 1</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className={"grid grid-cols-1 gap-3 md:grid-cols-2"}>
+                  <FormField
+                    control={form.control}
+                    name={"basicInformation.dateOfBirth"}
+                    render={({ field }) => (
+                      <FormItem className={"space-y-2"}>
+                        <FormLabel>
+                          Date of birth<span aria-hidden={true}>*</span>
+                        </FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                className={cn(
+                                  "w-full pl-3 text-left font-normal",
+                                  !birthDate && "text-muted-foreground",
+                                )}
+                                variant={"outline"}
+                              >
+                                {field.value ? (
+                                  format(field.value, "PPP")
+                                ) : (
+                                  <span>Pick a date</span>
+                                )}
+                                <CalendarIcon
+                                  className={"ml-auto h-4 w-4 opacity-50"}
+                                />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent
+                            align={"center"}
+                            className={"w-auto p-0"}
+                          >
+                            <div
+                              className={"flex flex-row justify-between p-2"}
+                            >
+                              <Select
+                                defaultValue={months[getMonth(birthDate)]}
+                                onValueChange={handleMonthChange}
+                              >
+                                <SelectTrigger className={"w-[110px]"}>
+                                  <SelectValue placeholder={"Month"} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {months.map((month) => (
+                                    <SelectItem key={month} value={month}>
+                                      {month}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <Select
+                                defaultValue={getYear(birthDate).toString()}
+                                onValueChange={handleYearChange}
+                              >
+                                <SelectTrigger className={"w-[110px]"}>
+                                  <SelectValue placeholder={"Year"} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {years.map((year) => (
+                                    <SelectItem
+                                      key={year}
+                                      value={year.toString()}
+                                    >
+                                      {year}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <Calendar
+                              disabled={(date) =>
+                                date > new Date() ||
+                                date < new Date("1900-01-01")
+                              }
+                              initialFocus
+                              mode={"single"}
+                              month={birthDate}
+                              onSelect={field.onChange}
+                              onMonthChange={setBirthDate}
+                              selected={field.value}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={"basicInformation.gender"}
+                    render={({ field }) => (
+                      <FormItem className={"space-y-2"}>
+                        <FormLabel>Gender</FormLabel>
+                        <Select
+                          defaultValue={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue
+                                placeholder={"Please select a gender"}
+                              />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value={"1"}>Option 1</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </>
             )}
 
             {/* Academic Background step */}
             {currentStep === 1 && (
-              <div className={"grid grid-cols-1"}>
-                <FormField
-                  control={form.control}
-                  name={"field2"}
-                  render={({ field }) => (
-                    <FormItem className={"space-y-2"}>
-                      <FormLabel>Field 2</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                    </FormItem>
+              <>
+                <div className={"grid grid-cols-1 gap-3 md:grid-cols-2"}>
+                  <FormField
+                    control={form.control}
+                    name={"academicBackground.educationLevel"}
+                    render={({ field }) => (
+                      <FormItem className={"space-y-2"}>
+                        <FormLabel>
+                          Current Academic Level
+                          <span aria-hidden={true}>*</span>
+                        </FormLabel>
+                        <Select
+                          defaultValue={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue
+                                placeholder={"Please select an academic level"}
+                              />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value={"1"}>Option 1</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={"academicBackground.currentOrLastInstitution"}
+                    render={({ field }) => (
+                      <FormItem className={"space-y-2"}>
+                        <FormLabel>
+                          Current or Most Recent School/Institution
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className={"grid grid-cols-1 gap-3 md:grid-cols-2"}>
+                  <FormField
+                    control={form.control}
+                    name={"academicBackground.graduationYear"}
+                    render={({ field }) => (
+                      <FormItem className={"space-y-2"}>
+                        <FormLabel>Graduation Year</FormLabel>
+                        <Select
+                          defaultValue={field.value?.toString()}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue
+                                placeholder={"Please select a graduation year"}
+                              />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value={"1"}>Option 1</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+                  {educationLevel === "High School" && (
+                    <FormField
+                      control={form.control}
+                      name={"academicBackground.intendedFieldOfStudyId"}
+                      render={({ field }) => (
+                        <FormItem className={"space-y-2"}>
+                          <FormLabel>Intended Field of Study</FormLabel>
+                          <Select
+                            defaultValue={field.value?.toString()}
+                            onValueChange={field.onChange}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue
+                                  placeholder={"Please select a field of study"}
+                                />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value={"1"}>Option 1</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
                   )}
-                />
-              </div>
+                  {educationLevel === "Undergraduate" && (
+                    <FormField
+                      control={form.control}
+                      name={"academicBackground.fieldOfStudyId"}
+                      render={({ field }) => (
+                        <FormItem className={"space-y-2"}>
+                          <FormLabel>Field of Study</FormLabel>
+                          <Select
+                            defaultValue={field.value?.toString()}
+                            onValueChange={field.onChange}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue
+                                  placeholder={"Please select a field of study"}
+                                />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value={"1"}>Option 1</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </div>
+              </>
             )}
 
             {/* Career & Personal Interests step */}
             {currentStep === 2 && (
-              <div className={"grid grid-cols-1"}>
-                <FormField
-                  control={form.control}
-                  name={"field3"}
-                  render={({ field }) => (
-                    <FormItem className={"space-y-2"}>
-                      <FormLabel>Field 3</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <>
+                <div className={"grid grid-cols-1"}>
+                  <FormField
+                    control={form.control}
+                    name={"personalInterests.extracurricularsIds"}
+                    render={() => (
+                      <FormItem className={"space-y-2"}>
+                        <div>
+                          <FormLabel>Extracurricular Activities</FormLabel>
+                          <FormDescription>
+                            What activities do you enjoy participating in
+                            outside of school?
+                          </FormDescription>
+                        </div>
+                        <FormField
+                          control={form.control}
+                          key={"1"}
+                          name={"personalInterests.extracurricularsIds"}
+                          render={({ field }) => (
+                            <FormItem
+                              className={
+                                "flex flex-row items-start space-x-3 space-y-0"
+                              }
+                              key={"1"}
+                            >
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value?.includes(1)}
+                                  onCheckedChange={(checked) => {
+                                    return checked
+                                      ? field.onChange([
+                                          ...(field.value ?? []),
+                                          1,
+                                        ])
+                                      : field.onChange(
+                                          field.value?.filter(
+                                            (value) => value !== 1,
+                                          ),
+                                        );
+                                  }}
+                                />
+                              </FormControl>
+                              <FormLabel className={"text-sm font-normal"}>
+                                Option 1
+                              </FormLabel>
+                            </FormItem>
+                          )}
+                        ></FormField>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className={"grid grid-cols-1"}>
+                  <FormField
+                    control={form.control}
+                    name={"personalInterests.additionalNotes"}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Is there anything else you would like to share about
+                          your interests or career goals?
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea
+                            className={"resize-none"}
+                            placeholder={"Tell us a little bit about yourself"}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Feel free to describe your goals, interests, or
+                          anything you think is important for us to know.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </>
             )}
             <div className={"flex justify-between"}>
               <Button
+                aria-label={"Go to previous step"}
                 disabled={currentStep === 0}
                 onClick={handlePreviousStep}
                 size={"icon"}
@@ -147,6 +590,7 @@ export default function OnboardingForm() {
                 <ChevronLeftIcon />
               </Button>
               <Button
+                aria-label={"Go to next step"}
                 onClick={handleNextStep}
                 size={"icon"}
                 variant={"outline"}
