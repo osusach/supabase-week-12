@@ -17,10 +17,11 @@ export default function GetStartedPage() {
   return (
     <Card className={"w-full max-w-2xl mx-auto"}>
       <CardHeader>
-        <CardTitle>Lorem Ipsum</CardTitle>
+        <CardTitle>Find your perfect scholarship match</CardTitle>
         <CardDescription>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          Tell us a little about yourself! Your responses will help us match you
+          with scholarships that align with your background and interests.
+          Fields marked with an asterisk (*) are required.
         </CardDescription>
       </CardHeader>
       <CardContent>
