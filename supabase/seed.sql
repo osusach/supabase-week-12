@@ -75,3 +75,10 @@ insert into "public"."institutions" (
     'https://uchile.cl',
     1
 );
+
+insert into
+  "public"."fields_of_study" (name)
+values
+  ('Business'),
+  ('Engineering'),
+  ('Law');
