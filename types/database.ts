@@ -93,6 +93,27 @@ export type Database = {
         };
         Relationships: [];
       };
+      fields_of_study: {
+        Row: {
+          created_at: string;
+          id: number;
+          name: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          id?: number;
+          name: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          id?: number;
+          name?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [];
+      };
       institutions: {
         Row: {
           abbreviation: string | null;
