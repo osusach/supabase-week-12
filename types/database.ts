@@ -164,6 +164,30 @@ export type Database = {
           },
         ];
       };
+      profiles: {
+        Row: {
+          created_at: string;
+          email: string | null;
+          id: string;
+          updated_at: string | null;
+          username: string;
+        };
+        Insert: {
+          created_at?: string;
+          email?: string | null;
+          id: string;
+          updated_at?: string | null;
+          username?: string;
+        };
+        Update: {
+          created_at?: string;
+          email?: string | null;
+          id?: string;
+          updated_at?: string | null;
+          username?: string;
+        };
+        Relationships: [];
+      };
       scholarships: {
         Row: {
           content: string;
@@ -248,7 +272,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      generate_username: {
+        Args: Record<PropertyKey, never>;
+        Returns: string;
+      };
     };
     Enums: {
       continents:
