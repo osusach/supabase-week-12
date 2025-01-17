@@ -93,6 +93,27 @@ export type Database = {
         };
         Relationships: [];
       };
+      extracurricular_activities: {
+        Row: {
+          created_at: string;
+          id: number;
+          name: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          id?: number;
+          name: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          id?: number;
+          name?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [];
+      };
       fields_of_study: {
         Row: {
           created_at: string;
@@ -263,6 +284,36 @@ export type Database = {
             columns: ["country_id"];
             isOneToOne: false;
             referencedRelation: "countries";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      user_extracurricular_activities: {
+        Row: {
+          activity_id: number;
+          user_id: string;
+        };
+        Insert: {
+          activity_id: number;
+          user_id: string;
+        };
+        Update: {
+          activity_id?: number;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_extracurricular_activities_activity_id_fkey";
+            columns: ["activity_id"];
+            isOneToOne: false;
+            referencedRelation: "extracurricular_activities";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "user_extracurricular_activities_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
         ];
