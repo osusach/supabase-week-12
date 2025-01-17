@@ -82,3 +82,9 @@ values
   ('Business'),
   ('Engineering'),
   ('Law');
+
+insert into "public"."extracurricular_activities" (name)
+values
+  ('Music'),
+  ('Sports'),
+  ('Volunteering');
