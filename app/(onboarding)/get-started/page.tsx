@@ -8,12 +8,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { fetchFormOptions } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "Onboarding",
 };
 
-export default function GetStartedPage() {
+export default async function GetStartedPage() {
+  const [cities, countries, extracurricularActivities, fieldsOfStudy, states] =
+    await fetchFormOptions();
+
   return (
     <Card className={"w-full max-w-2xl mx-auto"}>
       <CardHeader>
@@ -25,7 +29,15 @@ export default function GetStartedPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <OnboardingForm />
+        <OnboardingForm
+          formOptions={{
+            cities,
+            countries,
+            extracurricularActivities,
+            fieldsOfStudy,
+            states,
+          }}
+        />
       </CardContent>
     </Card>
   );
