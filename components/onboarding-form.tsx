@@ -40,7 +40,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { cn, months } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import {
+  birthYears,
+  educationLevels,
+  genders,
+  graduationYears,
+  months,
+} from "@/config/form-options";
 import type {
   City,
   Country,
@@ -57,7 +64,7 @@ const onboardingSteps = [
 
 const onboardingSchema = z.object({
   academicBackground: z.object({
-    educationLevel: z.enum(["High School", "Undergraduate"]),
+    educationLevel: z.enum(["high_school", "other", "undergraduate"]),
     currentOrLastInstitution: z.string().optional(),
     fieldOfStudyId: z.coerce.number().nullable(),
     graduationYear: z.coerce.number().nullable(),
@@ -68,7 +75,7 @@ const onboardingSchema = z.object({
     countryId: z.coerce.number(),
     dateOfBirth: z.coerce.date(),
     firstName: z.string(),
-    gender: z.enum(["Female", "Male", "Other"]),
+    gender: z.enum(["female", "male", "non_binary", "prefer_not_to_say"]),
     lastName: z.string(),
     stateId: z.coerce.number(),
   }),
@@ -93,13 +100,6 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const defaultCountry = formOptions.countries.find(
     (country) => country.name === "Chile",
-  );
-
-  const endYear = getYear(new Date());
-  const startYear = getYear(new Date()) - 100;
-  const years = Array.from(
-    { length: endYear - startYear + 1 },
-    (_, idx) => startYear + idx,
   );
 
   const form = useForm<z.infer<typeof onboardingSchema>>({
@@ -357,12 +357,12 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                                   <SelectValue placeholder={"Year"} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {years.map((year) => (
+                                  {birthYears.map((option) => (
                                     <SelectItem
-                                      key={year}
-                                      value={year.toString()}
+                                      key={option.value}
+                                      value={option.value}
                                     >
-                                      {year}
+                                      {option.label}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
@@ -404,7 +404,14 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value={"1"}>Option 1</SelectItem>
+                            {genders.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -440,7 +447,14 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value={"1"}>Option 1</SelectItem>
+                            {educationLevels.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </FormItem>
@@ -481,13 +495,20 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value={"1"}>Option 1</SelectItem>
+                            {graduationYears.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </FormItem>
                     )}
                   />
-                  {educationLevel === "High School" && (
+                  {educationLevel === "high_school" && (
                     <FormField
                       control={form.control}
                       name={"academicBackground.intendedFieldOfStudyId"}
@@ -506,7 +527,6 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {/* <SelectItem value={"1"}>Option 1</SelectItem> */}
                               {formOptions.fieldsOfStudy.map((field) => (
                                 <SelectItem
                                   key={field.id}
@@ -521,7 +541,7 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                       )}
                     />
                   )}
-                  {educationLevel === "Undergraduate" && (
+                  {educationLevel === "undergraduate" && (
                     <FormField
                       control={form.control}
                       name={"academicBackground.fieldOfStudyId"}
