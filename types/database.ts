@@ -187,82 +187,27 @@ export type Database = {
       };
       profiles: {
         Row: {
-          city_id: number | null;
           created_at: string;
-          date_of_birth: string | null;
-          education_level:
-            | Database["public"]["Enums"]["education_level_type"]
-            | null;
           email: string | null;
-          field_of_study_id: number | null;
-          first_name: string | null;
-          gender: Database["public"]["Enums"]["gender_type"] | null;
           id: string;
-          intended_field_of_study_id: number | null;
-          last_name: string | null;
-          onboarding_data: Json | null;
           updated_at: string | null;
           username: string;
         };
         Insert: {
-          city_id?: number | null;
           created_at?: string;
-          date_of_birth?: string | null;
-          education_level?:
-            | Database["public"]["Enums"]["education_level_type"]
-            | null;
           email?: string | null;
-          field_of_study_id?: number | null;
-          first_name?: string | null;
-          gender?: Database["public"]["Enums"]["gender_type"] | null;
           id: string;
-          intended_field_of_study_id?: number | null;
-          last_name?: string | null;
-          onboarding_data?: Json | null;
           updated_at?: string | null;
           username?: string;
         };
         Update: {
-          city_id?: number | null;
           created_at?: string;
-          date_of_birth?: string | null;
-          education_level?:
-            | Database["public"]["Enums"]["education_level_type"]
-            | null;
           email?: string | null;
-          field_of_study_id?: number | null;
-          first_name?: string | null;
-          gender?: Database["public"]["Enums"]["gender_type"] | null;
           id?: string;
-          intended_field_of_study_id?: number | null;
-          last_name?: string | null;
-          onboarding_data?: Json | null;
           updated_at?: string | null;
           username?: string;
         };
-        Relationships: [
-          {
-            foreignKeyName: "profiles_city_id_fkey";
-            columns: ["city_id"];
-            isOneToOne: false;
-            referencedRelation: "cities";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "profiles_field_of_study_id_fkey";
-            columns: ["field_of_study_id"];
-            isOneToOne: false;
-            referencedRelation: "fields_of_study";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "profiles_intended_field_of_study_id_fkey";
-            columns: ["intended_field_of_study_id"];
-            isOneToOne: false;
-            referencedRelation: "fields_of_study";
-            referencedColumns: ["id"];
-          },
-        ];
+        Relationships: [];
       };
       scholarships: {
         Row: {
@@ -392,8 +337,6 @@ export type Database = {
         | "Oceania"
         | "North America"
         | "South America";
-      education_level_type: "high_school" | "undergraduate" | "other";
-      gender_type: "male" | "female" | "non_binary" | "prefer_not_to_say";
       institution_category: "university" | "ngo" | "government" | "other";
       institution_funding_type: "public" | "private" | "mixed" | "other";
       scholarship_category: "complementary" | "tuition" | "other";
