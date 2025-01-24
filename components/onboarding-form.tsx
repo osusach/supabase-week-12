@@ -40,7 +40,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { cn, months } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import {
+  birthYears,
+  educationLevels,
+  genders,
+  graduationYears,
+  months,
+} from "@/config/form-options";
+import type {
+  City,
+  Country,
+  ExtracurricularActivity,
+  FieldOfStudy,
+  State,
+} from "@/lib/data";
 
 const onboardingSteps = [
   { icon: UserIcon, label: "Basic Information" },
@@ -50,36 +64,42 @@ const onboardingSteps = [
 
 const onboardingSchema = z.object({
   academicBackground: z.object({
-    educationLevel: z.enum(["High School", "Undergraduate"]),
+    educationLevel: z.enum(["high_school", "other", "undergraduate"]),
     currentOrLastInstitution: z.string().optional(),
-    fieldOfStudyId: z.coerce.number().optional(),
-    graduationYear: z.coerce.number().optional(),
-    intendedFieldOfStudyId: z.coerce.number().optional(),
+    fieldOfStudyId: z.coerce.number().nullable(),
+    graduationYear: z.coerce.number().nullable(),
+    intendedFieldOfStudyId: z.coerce.number().nullable(),
   }),
   basicInformation: z.object({
     cityId: z.coerce.number(),
     countryId: z.coerce.number(),
     dateOfBirth: z.coerce.date(),
     firstName: z.string(),
-    gender: z.enum(["Female", "Male", "Other"]).optional(),
+    gender: z.enum(["female", "male", "non_binary", "prefer_not_to_say"]),
     lastName: z.string(),
     stateId: z.coerce.number(),
   }),
   personalInterests: z.object({
-    extracurricularsIds: z.array(z.coerce.number()).optional(),
+    extracurricularsIds: z.array(z.coerce.number()),
     additionalNotes: z.string().optional(),
   }),
 });
 
-export default function OnboardingForm() {
+interface OnboardingFormProps {
+  formOptions: {
+    cities: City[];
+    countries: Country[];
+    extracurricularActivities: ExtracurricularActivity[];
+    fieldsOfStudy: FieldOfStudy[];
+    states: State[];
+  };
+}
+
+export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
   const [birthDate, setBirthDate] = useState<Date>(new Date());
   const [currentStep, setCurrentStep] = useState<number>(0);
-
-  const endYear = getYear(new Date());
-  const startYear = getYear(new Date()) - 100;
-  const years = Array.from(
-    { length: endYear - startYear + 1 },
-    (_, idx) => startYear + idx,
+  const defaultCountry = formOptions.countries.find(
+    (country) => country.name === "Chile",
   );
 
   const form = useForm<z.infer<typeof onboardingSchema>>({
@@ -90,6 +110,7 @@ export default function OnboardingForm() {
       basicInformation: {
         firstName: "",
         lastName: "",
+        countryId: defaultCountry?.id,
       },
       personalInterests: {
         additionalNotes: "",
@@ -99,6 +120,11 @@ export default function OnboardingForm() {
     resolver: zodResolver(onboardingSchema),
   });
   const educationLevel = form.watch("academicBackground.educationLevel");
+  const countryId = form.watch("basicInformation.countryId");
+  // Casting to 'unknown' and then to 'string' to resolve a type conflict
+  // caused by 'react-hook-form' returning a number type from the schema,
+  // while select values are strings.
+  const stateId = form.watch("basicInformation.stateId") as unknown as string;
 
   const handleMonthChange = (month: string) => {
     const date = setMonth(birthDate, months.indexOf(month));
@@ -216,7 +242,16 @@ export default function OnboardingForm() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value={"1"}>Option 1</SelectItem>
+                            {formOptions.states
+                              .filter((state) => state.country_id === countryId)
+                              .map((state) => (
+                                <SelectItem
+                                  key={state.id}
+                                  value={state.id.toString()}
+                                >
+                                  {state.name}
+                                </SelectItem>
+                              ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -243,7 +278,18 @@ export default function OnboardingForm() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value={"1"}>Option 1</SelectItem>
+                            {formOptions.cities
+                              .filter(
+                                (city) => city.state_id.toString() === stateId,
+                              )
+                              .map((city) => (
+                                <SelectItem
+                                  key={city.id}
+                                  value={city.id.toString()}
+                                >
+                                  {city.name}
+                                </SelectItem>
+                              ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -311,12 +357,12 @@ export default function OnboardingForm() {
                                   <SelectValue placeholder={"Year"} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {years.map((year) => (
+                                  {birthYears.map((option) => (
                                     <SelectItem
-                                      key={year}
-                                      value={year.toString()}
+                                      key={option.value}
+                                      value={option.value}
                                     >
-                                      {year}
+                                      {option.label}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
@@ -358,7 +404,14 @@ export default function OnboardingForm() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value={"1"}>Option 1</SelectItem>
+                            {genders.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -394,7 +447,14 @@ export default function OnboardingForm() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value={"1"}>Option 1</SelectItem>
+                            {educationLevels.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </FormItem>
@@ -435,13 +495,20 @@ export default function OnboardingForm() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value={"1"}>Option 1</SelectItem>
+                            {graduationYears.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </FormItem>
                     )}
                   />
-                  {educationLevel === "High School" && (
+                  {educationLevel === "high_school" && (
                     <FormField
                       control={form.control}
                       name={"academicBackground.intendedFieldOfStudyId"}
@@ -460,14 +527,21 @@ export default function OnboardingForm() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value={"1"}>Option 1</SelectItem>
+                              {formOptions.fieldsOfStudy.map((field) => (
+                                <SelectItem
+                                  key={field.id}
+                                  value={field.id.toString()}
+                                >
+                                  {field.name}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </FormItem>
                       )}
                     />
                   )}
-                  {educationLevel === "Undergraduate" && (
+                  {educationLevel === "undergraduate" && (
                     <FormField
                       control={form.control}
                       name={"academicBackground.fieldOfStudyId"}
@@ -486,7 +560,15 @@ export default function OnboardingForm() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value={"1"}>Option 1</SelectItem>
+                              {/* <SelectItem value={"1"}>Option 1</SelectItem> */}
+                              {formOptions.fieldsOfStudy.map((field) => (
+                                <SelectItem
+                                  key={field.id}
+                                  value={field.id.toString()}
+                                >
+                                  {field.name}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </FormItem>
@@ -505,48 +587,55 @@ export default function OnboardingForm() {
                     control={form.control}
                     name={"personalInterests.extracurricularsIds"}
                     render={() => (
-                      <FormItem className={"space-y-2"}>
-                        <div>
+                      <FormItem>
+                        <div className={"mb-4"}>
                           <FormLabel>Extracurricular Activities</FormLabel>
                           <FormDescription>
                             What activities do you enjoy participating in
                             outside of school?
                           </FormDescription>
                         </div>
-                        <FormField
-                          control={form.control}
-                          key={"1"}
-                          name={"personalInterests.extracurricularsIds"}
-                          render={({ field }) => (
-                            <FormItem
-                              className={
-                                "flex flex-row items-start space-x-3 space-y-0"
-                              }
-                              key={"1"}
-                            >
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value?.includes(1)}
-                                  onCheckedChange={(checked) => {
-                                    return checked
-                                      ? field.onChange([
-                                          ...(field.value ?? []),
-                                          1,
-                                        ])
-                                      : field.onChange(
-                                          field.value?.filter(
-                                            (value) => value !== 1,
-                                          ),
-                                        );
-                                  }}
-                                />
-                              </FormControl>
-                              <FormLabel className={"text-sm font-normal"}>
-                                Option 1
-                              </FormLabel>
-                            </FormItem>
-                          )}
-                        ></FormField>
+                        {formOptions.extracurricularActivities.map(
+                          (activity) => (
+                            <FormField
+                              control={form.control}
+                              key={activity.id}
+                              name={"personalInterests.extracurricularsIds"}
+                              render={({ field }) => (
+                                <FormItem
+                                  className={
+                                    "flex flex-row items-start space-x-3 space-y-0"
+                                  }
+                                  key={activity.id}
+                                >
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value?.includes(
+                                        activity.id,
+                                      )}
+                                      onCheckedChange={(checked) => {
+                                        return checked
+                                          ? field.onChange([
+                                              ...field.value,
+                                              activity.id,
+                                            ])
+                                          : field.onChange(
+                                              field.value?.filter(
+                                                (value) =>
+                                                  value !== activity.id,
+                                              ),
+                                            );
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className={"text-sm font-normal"}>
+                                    {activity.name}
+                                  </FormLabel>
+                                </FormItem>
+                              )}
+                            />
+                          ),
+                        )}
                       </FormItem>
                     )}
                   />
