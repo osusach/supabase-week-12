@@ -5,6 +5,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   GraduationCapIcon,
+  PuzzleIcon,
   RocketIcon,
   UserIcon,
 } from "lucide-react";
@@ -60,6 +61,7 @@ const onboardingSteps = [
   { icon: UserIcon, label: "Basic Information" },
   { icon: GraduationCapIcon, label: "Academic Background" },
   { icon: RocketIcon, label: "Career & Personal Interests" },
+  { icon: PuzzleIcon, label: "Match" },
 ];
 
 const onboardingSchema = z.object({
@@ -668,6 +670,10 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                 </div>
               </>
             )}
+
+            {/* Match results step */}
+            {/* TODO: Display results based on match */}
+
             <div className={"flex justify-between"}>
               <Button
                 aria-label={"Go to previous step"}
