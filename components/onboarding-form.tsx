@@ -58,9 +58,35 @@ import type {
 } from "@/lib/data";
 
 const onboardingSteps = [
-  { icon: UserIcon, label: "Basic Information" },
-  { icon: GraduationCapIcon, label: "Academic Background" },
-  { icon: RocketIcon, label: "Career & Personal Interests" },
+  {
+    fields: [
+      "basicInformation.cityId",
+      "basicInformation.countryId",
+      "basicInformation.dateOfBirth",
+      "basicInformation.firstName",
+      "basicInformation.gender",
+      "basicInformation.lastName",
+      "basicInformation.stateId",
+    ],
+    icon: UserIcon,
+    label: "Basic Information",
+  },
+  {
+    fields: [
+      "academicBackground.educationLevel",
+      "academicBackground.currentOrLastInstitution",
+      "academicBackground.fieldOfStudyId",
+      "academicBackground.graduationYear",
+      "academicBackground.intendedFieldOfStudyId",
+    ],
+    icon: GraduationCapIcon,
+    label: "Academic Background",
+  },
+  {
+    fields: ["extracurricularsIds", "additionalNotes"],
+    icon: RocketIcon,
+    label: "Career & Personal Interests",
+  },
   { icon: PuzzleIcon, label: "Match" },
 ];
 
@@ -87,6 +113,8 @@ const onboardingSchema = z.object({
   }),
 });
 
+type Fields = z.infer<typeof onboardingSchema>;
+
 interface OnboardingFormProps {
   formOptions: {
     cities: City[];
@@ -104,10 +132,13 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
     (country) => country.name === "Chile",
   );
 
-  const form = useForm<z.infer<typeof onboardingSchema>>({
+  const form = useForm<Fields>({
     defaultValues: {
       academicBackground: {
         currentOrLastInstitution: "",
+        fieldOfStudyId: null,
+        graduationYear: null,
+        intendedFieldOfStudyId: null,
       },
       basicInformation: {
         firstName: "",
@@ -138,9 +169,18 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
     setBirthDate(date);
   };
 
-  const handleNextStep = () => {
-    if (currentStep === onboardingSteps.length - 1) return;
-    setCurrentStep((step) => step + 1);
+  const handleNextStep = async () => {
+    const fields = onboardingSteps[currentStep].fields;
+    // Validate current step fields before advancing to next step
+    const validate = await form.trigger(fields as (keyof Fields)[], {
+      shouldFocus: true,
+    });
+
+    if (!validate) return;
+
+    if (currentStep < onboardingSteps.length - 2) {
+      setCurrentStep((step) => step + 1);
+    }
   };
 
   const handlePreviousStep = () => {
@@ -148,8 +188,8 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
     setCurrentStep((step) => step - 1);
   };
 
-  const onSubmit = (values: z.infer<typeof onboardingSchema>) => {
-    console.log(values);
+  const onSubmit = (values: Fields) => {
+    console.log("onSubmit", values);
   };
 
   return (
@@ -562,7 +602,6 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {/* <SelectItem value={"1"}>Option 1</SelectItem> */}
                               {formOptions.fieldsOfStudy.map((field) => (
                                 <SelectItem
                                   key={field.id}
@@ -680,18 +719,27 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                 disabled={currentStep === 0}
                 onClick={handlePreviousStep}
                 size={"icon"}
+                type={"button"}
                 variant={"outline"}
               >
                 <ChevronLeftIcon />
               </Button>
-              <Button
-                aria-label={"Go to next step"}
-                onClick={handleNextStep}
-                size={"icon"}
-                variant={"outline"}
-              >
-                <ChevronRightIcon />
-              </Button>
+              {currentStep === onboardingSteps.length - 2 && (
+                <Button type={"submit"}>
+                  Find my match <ChevronRightIcon className={"ml-2 h-5 w-5"} />
+                </Button>
+              )}
+              {currentStep < onboardingSteps.length - 2 && (
+                <Button
+                  aria-label={"Go to next step"}
+                  onClick={handleNextStep}
+                  size={"icon"}
+                  type={"button"}
+                  variant={"outline"}
+                >
+                  <ChevronRightIcon />
+                </Button>
+              )}
             </div>
           </div>
         </form>
