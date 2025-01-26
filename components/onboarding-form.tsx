@@ -12,7 +12,6 @@ import {
 import { format, getMonth, getYear, setMonth, setYear } from "date-fns";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
@@ -41,7 +40,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
 import {
   birthYears,
   educationLevels,
@@ -49,6 +47,11 @@ import {
   graduationYears,
   months,
 } from "@/config/form-options";
+import { cn } from "@/lib/utils";
+import {
+  onboardingSchema,
+  type OnboardingSchema,
+} from "@/lib/schemas/onboarding-schema";
 import type {
   City,
   Country,
@@ -90,31 +93,6 @@ const onboardingSteps = [
   { icon: PuzzleIcon, label: "Match" },
 ];
 
-const onboardingSchema = z.object({
-  academicBackground: z.object({
-    educationLevel: z.enum(["high_school", "other", "undergraduate"]),
-    currentOrLastInstitution: z.string().optional(),
-    fieldOfStudyId: z.coerce.number().nullable(),
-    graduationYear: z.coerce.number().nullable(),
-    intendedFieldOfStudyId: z.coerce.number().nullable(),
-  }),
-  basicInformation: z.object({
-    cityId: z.coerce.number(),
-    countryId: z.coerce.number(),
-    dateOfBirth: z.coerce.date(),
-    firstName: z.string(),
-    gender: z.enum(["female", "male", "non_binary", "prefer_not_to_say"]),
-    lastName: z.string(),
-    stateId: z.coerce.number(),
-  }),
-  personalInterests: z.object({
-    extracurricularsIds: z.array(z.coerce.number()),
-    additionalNotes: z.string().optional(),
-  }),
-});
-
-type Fields = z.infer<typeof onboardingSchema>;
-
 interface OnboardingFormProps {
   formOptions: {
     cities: City[];
@@ -132,7 +110,7 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
     (country) => country.name === "Chile",
   );
 
-  const form = useForm<Fields>({
+  const form = useForm<OnboardingSchema>({
     defaultValues: {
       academicBackground: {
         currentOrLastInstitution: "",
@@ -172,7 +150,7 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
   const handleNextStep = async () => {
     const fields = onboardingSteps[currentStep].fields;
     // Validate current step fields before advancing to next step
-    const validate = await form.trigger(fields as (keyof Fields)[], {
+    const validate = await form.trigger(fields as (keyof OnboardingSchema)[], {
       shouldFocus: true,
     });
 
@@ -188,7 +166,7 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
     setCurrentStep((step) => step - 1);
   };
 
-  const onSubmit = (values: Fields) => {
+  const onSubmit = (values: OnboardingSchema) => {
     console.log("onSubmit", values);
   };
 
