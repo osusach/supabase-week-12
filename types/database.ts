@@ -188,10 +188,12 @@ export type Database = {
       onboarding_profiles: {
         Row: {
           city_id: number | null;
+          created_at: string;
           date_of_birth: string | null;
           education_level:
             | Database["public"]["Enums"]["education_level_type"]
             | null;
+          embedding: string | null;
           field_of_study_id: number | null;
           first_name: string | null;
           gender: Database["public"]["Enums"]["gender_type"] | null;
@@ -200,14 +202,17 @@ export type Database = {
           last_name: string | null;
           onboarding_data: Json;
           status: Database["public"]["Enums"]["onboarding_status_type"];
+          updated_at: string | null;
           user_id: string;
         };
         Insert: {
           city_id?: number | null;
+          created_at?: string;
           date_of_birth?: string | null;
           education_level?:
             | Database["public"]["Enums"]["education_level_type"]
             | null;
+          embedding?: string | null;
           field_of_study_id?: number | null;
           first_name?: string | null;
           gender?: Database["public"]["Enums"]["gender_type"] | null;
@@ -216,14 +221,17 @@ export type Database = {
           last_name?: string | null;
           onboarding_data?: Json;
           status?: Database["public"]["Enums"]["onboarding_status_type"];
+          updated_at?: string | null;
           user_id: string;
         };
         Update: {
           city_id?: number | null;
+          created_at?: string;
           date_of_birth?: string | null;
           education_level?:
             | Database["public"]["Enums"]["education_level_type"]
             | null;
+          embedding?: string | null;
           field_of_study_id?: number | null;
           first_name?: string | null;
           gender?: Database["public"]["Enums"]["gender_type"] | null;
@@ -232,6 +240,7 @@ export type Database = {
           last_name?: string | null;
           onboarding_data?: Json;
           status?: Database["public"]["Enums"]["onboarding_status_type"];
+          updated_at?: string | null;
           user_id?: string;
         };
         Relationships: [
