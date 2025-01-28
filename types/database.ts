@@ -416,6 +416,19 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: string;
       };
+      match_scholarships: {
+        Args: {
+          profile_embedding: string;
+          match_threshold: number;
+          match_count: number;
+        };
+        Returns: {
+          id: number;
+          content: string;
+          name: string;
+          url: string;
+        }[];
+      };
     };
     Enums: {
       continents:
