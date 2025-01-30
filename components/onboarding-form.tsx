@@ -52,6 +52,7 @@ import {
   onboardingSchema,
   type OnboardingSchema,
 } from "@/lib/schemas/onboarding-schema";
+import { matchScholarships } from "@/actions/scholarships";
 import type {
   City,
   Country,
@@ -59,6 +60,7 @@ import type {
   FieldOfStudy,
   State,
 } from "@/lib/data";
+import type { Tables } from "@/types/database";
 
 const onboardingSteps = [
   {
@@ -106,6 +108,10 @@ interface OnboardingFormProps {
 export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
   const [birthDate, setBirthDate] = useState<Date>(new Date());
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const [message, setMessage] = useState<string | null>(null);
+  const [scholarships, setScholarships] = useState<Array<
+    Tables<"scholarships">
+  > | null>(null);
   const defaultCountry = formOptions.countries.find(
     (country) => country.name === "Chile",
   );
@@ -166,8 +172,15 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
     setCurrentStep((step) => step - 1);
   };
 
-  const onSubmit = (values: OnboardingSchema) => {
-    console.log("onSubmit", values);
+  const onSubmit = async (values: OnboardingSchema) => {
+    setCurrentStep((step) => step + 1);
+    const response = await matchScholarships(values);
+
+    if (response.success) {
+      setScholarships(response?.data ?? null);
+    } else {
+      setMessage(response.message ?? "An error occurred.");
+    }
   };
 
   return (
@@ -689,7 +702,28 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
             )}
 
             {/* Match results step */}
-            {/* TODO: Display results based on match */}
+            {currentStep === 3 && (
+              <div>
+                {form.formState.isSubmitting ? (
+                  <div>Loading...</div>
+                ) : (
+                  <div>
+                    {scholarships && scholarships.length > 0 ? (
+                      <div>
+                        {scholarships?.map((scholarship) => (
+                          <p>{scholarship.name}</p>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className={"text-center max-w-md mx-auto"}>
+                        Sorry, we couldn&#39;t find any scholarships that match
+                        your profile at the moment.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className={"flex justify-between"}>
               <Button
