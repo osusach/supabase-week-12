@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import ScholarshipCard from "@/components/scholarship-card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -52,7 +53,7 @@ import {
   onboardingSchema,
   type OnboardingSchema,
 } from "@/lib/schemas/onboarding-schema";
-import { matchScholarships } from "@/actions/scholarships";
+import { matchScholarships, type Scholarship } from "@/actions/scholarships";
 import type {
   City,
   Country,
@@ -60,7 +61,6 @@ import type {
   FieldOfStudy,
   State,
 } from "@/lib/data";
-import type { Tables } from "@/types/database";
 
 const onboardingSteps = [
   {
@@ -109,9 +109,9 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
   const [birthDate, setBirthDate] = useState<Date>(new Date());
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [message, setMessage] = useState<string | null>(null);
-  const [scholarships, setScholarships] = useState<Array<
-    Tables<"scholarships">
-  > | null>(null);
+  const [scholarships, setScholarships] = useState<Array<Scholarship> | null>(
+    null,
+  );
   const defaultCountry = formOptions.countries.find(
     (country) => country.name === "Chile",
   );
@@ -174,13 +174,14 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
 
   const onSubmit = async (values: OnboardingSchema) => {
     setCurrentStep((step) => step + 1);
+
     const response = await matchScholarships(values);
 
-    if (response.success) {
-      setScholarships(response?.data ?? null);
-    } else {
+    if (!response.success) {
       setMessage(response.message ?? "An error occurred.");
     }
+
+    setScholarships(response.data);
   };
 
   return (
@@ -703,23 +704,34 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
 
             {/* Match results step */}
             {currentStep === 3 && (
-              <div>
+              <div className={"flex flex-col justify-center items-center py-5"}>
                 {form.formState.isSubmitting ? (
                   <div>Loading...</div>
                 ) : (
                   <div>
+                    {message && (
+                      <p className={"text-center max-w-md"}>{message}</p>
+                    )}
+
                     {scholarships && scholarships.length > 0 ? (
                       <div>
-                        {scholarships?.map((scholarship) => (
-                          <p>{scholarship.name}</p>
-                        ))}
+                        <h2 className={"text-center text-xl font-medium mb-4"}>
+                          Top results
+                        </h2>
+                        <ul className={"space-y-3"}>
+                          {scholarships.map((scholarship) => (
+                            <li key={scholarship.id}>
+                              <ScholarshipCard scholarship={scholarship} />
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                    ) : (
-                      <p className={"text-center max-w-md mx-auto"}>
+                    ) : scholarships?.length === 0 ? (
+                      <p className={"text-center max-w-md"}>
                         Sorry, we couldn&#39;t find any scholarships that match
                         your profile at the moment.
                       </p>
-                    )}
+                    ) : null}
                   </div>
                 )}
               </div>
