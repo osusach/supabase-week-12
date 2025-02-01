@@ -93,6 +93,48 @@ export type Database = {
         };
         Relationships: [];
       };
+      extracurricular_activities: {
+        Row: {
+          created_at: string;
+          id: number;
+          name: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          id?: number;
+          name: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          id?: number;
+          name?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [];
+      };
+      fields_of_study: {
+        Row: {
+          created_at: string;
+          id: number;
+          name: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          id?: number;
+          name: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          id?: number;
+          name?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [];
+      };
       institutions: {
         Row: {
           abbreviation: string | null;
@@ -143,6 +185,163 @@ export type Database = {
           },
         ];
       };
+      onboarding_profiles: {
+        Row: {
+          city_id: number | null;
+          created_at: string;
+          date_of_birth: string | null;
+          education_level:
+            | Database["public"]["Enums"]["education_level_type"]
+            | null;
+          embedding: string | null;
+          field_of_study_id: number | null;
+          first_name: string | null;
+          gender: Database["public"]["Enums"]["gender_type"] | null;
+          id: number;
+          intended_field_of_study_id: number | null;
+          last_name: string | null;
+          onboarding_data: Json;
+          status: Database["public"]["Enums"]["onboarding_status_type"];
+          updated_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          city_id?: number | null;
+          created_at?: string;
+          date_of_birth?: string | null;
+          education_level?:
+            | Database["public"]["Enums"]["education_level_type"]
+            | null;
+          embedding?: string | null;
+          field_of_study_id?: number | null;
+          first_name?: string | null;
+          gender?: Database["public"]["Enums"]["gender_type"] | null;
+          id?: number;
+          intended_field_of_study_id?: number | null;
+          last_name?: string | null;
+          onboarding_data?: Json;
+          status?: Database["public"]["Enums"]["onboarding_status_type"];
+          updated_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          city_id?: number | null;
+          created_at?: string;
+          date_of_birth?: string | null;
+          education_level?:
+            | Database["public"]["Enums"]["education_level_type"]
+            | null;
+          embedding?: string | null;
+          field_of_study_id?: number | null;
+          first_name?: string | null;
+          gender?: Database["public"]["Enums"]["gender_type"] | null;
+          id?: number;
+          intended_field_of_study_id?: number | null;
+          last_name?: string | null;
+          onboarding_data?: Json;
+          status?: Database["public"]["Enums"]["onboarding_status_type"];
+          updated_at?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_profiles_city_id_fkey";
+            columns: ["city_id"];
+            isOneToOne: false;
+            referencedRelation: "cities";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "onboarding_profiles_field_of_study_id_fkey";
+            columns: ["field_of_study_id"];
+            isOneToOne: false;
+            referencedRelation: "fields_of_study";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "onboarding_profiles_intended_field_of_study_id_fkey";
+            columns: ["intended_field_of_study_id"];
+            isOneToOne: false;
+            referencedRelation: "fields_of_study";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "onboarding_profiles_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      profiles: {
+        Row: {
+          created_at: string;
+          email: string | null;
+          id: string;
+          updated_at: string | null;
+          username: string;
+        };
+        Insert: {
+          created_at?: string;
+          email?: string | null;
+          id: string;
+          updated_at?: string | null;
+          username?: string;
+        };
+        Update: {
+          created_at?: string;
+          email?: string | null;
+          id?: string;
+          updated_at?: string | null;
+          username?: string;
+        };
+        Relationships: [];
+      };
+      scholarships: {
+        Row: {
+          content: string;
+          created_at: string;
+          embedding: string;
+          id: number;
+          institution_id: number;
+          name: string;
+          scholarship_category: Database["public"]["Enums"]["scholarship_category"];
+          updated_at: string | null;
+          url: string;
+        };
+        Insert: {
+          content: string;
+          created_at?: string;
+          embedding: string;
+          id?: number;
+          institution_id: number;
+          name: string;
+          scholarship_category: Database["public"]["Enums"]["scholarship_category"];
+          updated_at?: string | null;
+          url: string;
+        };
+        Update: {
+          content?: string;
+          created_at?: string;
+          embedding?: string;
+          id?: number;
+          institution_id?: number;
+          name?: string;
+          scholarship_category?: Database["public"]["Enums"]["scholarship_category"];
+          updated_at?: string | null;
+          url?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "scholarships_institution_id_fkey";
+            columns: ["institution_id"];
+            isOneToOne: false;
+            referencedRelation: "institutions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       states: {
         Row: {
           abbreviation: string | null;
@@ -178,12 +377,58 @@ export type Database = {
           },
         ];
       };
+      user_extracurricular_activities: {
+        Row: {
+          activity_id: number;
+          user_id: string;
+        };
+        Insert: {
+          activity_id: number;
+          user_id: string;
+        };
+        Update: {
+          activity_id?: number;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_extracurricular_activities_activity_id_fkey";
+            columns: ["activity_id"];
+            isOneToOne: false;
+            referencedRelation: "extracurricular_activities";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "user_extracurricular_activities_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      generate_username: {
+        Args: Record<PropertyKey, never>;
+        Returns: string;
+      };
+      match_scholarships: {
+        Args: {
+          profile_embedding: string;
+          match_threshold: number;
+          match_count: number;
+        };
+        Returns: {
+          id: number;
+          content: string;
+          name: string;
+          url: string;
+        }[];
+      };
     };
     Enums: {
       continents:
@@ -194,9 +439,12 @@ export type Database = {
         | "Oceania"
         | "North America"
         | "South America";
+      education_level_type: "high_school" | "undergraduate" | "other";
+      gender_type: "male" | "female" | "non_binary" | "prefer_not_to_say";
       institution_category: "university" | "ngo" | "government" | "other";
       institution_funding_type: "public" | "private" | "mixed" | "other";
-      institution_types: "university" | "ngo" | "government" | "other";
+      onboarding_status_type: "not_started" | "in_progress" | "completed";
+      scholarship_category: "complementary" | "tuition" | "other";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -284,4 +532,19 @@ export type Enums<
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never;
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database;
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never;
