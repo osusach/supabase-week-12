@@ -5,15 +5,16 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   GraduationCapIcon,
+  PuzzleIcon,
   RocketIcon,
   UserIcon,
 } from "lucide-react";
 import { format, getMonth, getYear, setMonth, setYear } from "date-fns";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import ScholarshipCard from "@/components/scholarship-card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -40,7 +41,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
 import {
   birthYears,
   educationLevels,
@@ -48,6 +48,12 @@ import {
   graduationYears,
   months,
 } from "@/config/form-options";
+import { cn } from "@/lib/utils";
+import {
+  onboardingSchema,
+  type OnboardingSchema,
+} from "@/lib/schemas/onboarding-schema";
+import { matchScholarships, type Scholarship } from "@/actions/scholarships";
 import type {
   City,
   Country,
@@ -57,33 +63,37 @@ import type {
 } from "@/lib/data";
 
 const onboardingSteps = [
-  { icon: UserIcon, label: "Basic Information" },
-  { icon: GraduationCapIcon, label: "Academic Background" },
-  { icon: RocketIcon, label: "Career & Personal Interests" },
+  {
+    fields: [
+      "basicInformation.cityId",
+      "basicInformation.countryId",
+      "basicInformation.dateOfBirth",
+      "basicInformation.firstName",
+      "basicInformation.gender",
+      "basicInformation.lastName",
+      "basicInformation.stateId",
+    ],
+    icon: UserIcon,
+    label: "Basic Information",
+  },
+  {
+    fields: [
+      "academicBackground.educationLevel",
+      "academicBackground.currentOrLastInstitution",
+      "academicBackground.fieldOfStudyId",
+      "academicBackground.graduationYear",
+      "academicBackground.intendedFieldOfStudyId",
+    ],
+    icon: GraduationCapIcon,
+    label: "Academic Background",
+  },
+  {
+    fields: ["extracurricularsIds", "additionalNotes"],
+    icon: RocketIcon,
+    label: "Career & Personal Interests",
+  },
+  { icon: PuzzleIcon, label: "Match" },
 ];
-
-const onboardingSchema = z.object({
-  academicBackground: z.object({
-    educationLevel: z.enum(["high_school", "other", "undergraduate"]),
-    currentOrLastInstitution: z.string().optional(),
-    fieldOfStudyId: z.coerce.number().nullable(),
-    graduationYear: z.coerce.number().nullable(),
-    intendedFieldOfStudyId: z.coerce.number().nullable(),
-  }),
-  basicInformation: z.object({
-    cityId: z.coerce.number(),
-    countryId: z.coerce.number(),
-    dateOfBirth: z.coerce.date(),
-    firstName: z.string(),
-    gender: z.enum(["female", "male", "non_binary", "prefer_not_to_say"]),
-    lastName: z.string(),
-    stateId: z.coerce.number(),
-  }),
-  personalInterests: z.object({
-    extracurricularsIds: z.array(z.coerce.number()),
-    additionalNotes: z.string().optional(),
-  }),
-});
 
 interface OnboardingFormProps {
   formOptions: {
@@ -98,14 +108,21 @@ interface OnboardingFormProps {
 export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
   const [birthDate, setBirthDate] = useState<Date>(new Date());
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const [message, setMessage] = useState<string | null>(null);
+  const [scholarships, setScholarships] = useState<Array<Scholarship> | null>(
+    null,
+  );
   const defaultCountry = formOptions.countries.find(
     (country) => country.name === "Chile",
   );
 
-  const form = useForm<z.infer<typeof onboardingSchema>>({
+  const form = useForm<OnboardingSchema>({
     defaultValues: {
       academicBackground: {
         currentOrLastInstitution: "",
+        fieldOfStudyId: null,
+        graduationYear: null,
+        intendedFieldOfStudyId: null,
       },
       basicInformation: {
         firstName: "",
@@ -136,9 +153,18 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
     setBirthDate(date);
   };
 
-  const handleNextStep = () => {
-    if (currentStep === onboardingSteps.length - 1) return;
-    setCurrentStep((step) => step + 1);
+  const handleNextStep = async () => {
+    const fields = onboardingSteps[currentStep].fields;
+    // Validate current step fields before advancing to next step
+    const validate = await form.trigger(fields as (keyof OnboardingSchema)[], {
+      shouldFocus: true,
+    });
+
+    if (!validate) return;
+
+    if (currentStep < onboardingSteps.length - 2) {
+      setCurrentStep((step) => step + 1);
+    }
   };
 
   const handlePreviousStep = () => {
@@ -146,8 +172,16 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
     setCurrentStep((step) => step - 1);
   };
 
-  const onSubmit = (values: z.infer<typeof onboardingSchema>) => {
-    console.log(values);
+  const onSubmit = async (values: OnboardingSchema) => {
+    setCurrentStep((step) => step + 1);
+
+    const response = await matchScholarships(values);
+
+    if (!response.success) {
+      setMessage(response.message ?? "An error occurred.");
+    }
+
+    setScholarships(response.data);
   };
 
   return (
@@ -560,7 +594,6 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {/* <SelectItem value={"1"}>Option 1</SelectItem> */}
                               {formOptions.fieldsOfStudy.map((field) => (
                                 <SelectItem
                                   key={field.id}
@@ -668,24 +701,69 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                 </div>
               </>
             )}
+
+            {/* Match results step */}
+            {currentStep === 3 && (
+              <div className={"flex flex-col justify-center items-center py-5"}>
+                {form.formState.isSubmitting ? (
+                  <div>Loading...</div>
+                ) : (
+                  <div>
+                    {message && (
+                      <p className={"text-center max-w-md"}>{message}</p>
+                    )}
+
+                    {scholarships && scholarships.length > 0 ? (
+                      <div>
+                        <h2 className={"text-center text-xl font-medium mb-4"}>
+                          Top results
+                        </h2>
+                        <ul className={"space-y-3"}>
+                          {scholarships.map((scholarship) => (
+                            <li key={scholarship.id}>
+                              <ScholarshipCard scholarship={scholarship} />
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : scholarships?.length === 0 ? (
+                      <p className={"text-center max-w-md"}>
+                        Sorry, we couldn&#39;t find any scholarships that match
+                        your profile at the moment.
+                      </p>
+                    ) : null}
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className={"flex justify-between"}>
               <Button
                 aria-label={"Go to previous step"}
                 disabled={currentStep === 0}
                 onClick={handlePreviousStep}
                 size={"icon"}
+                type={"button"}
                 variant={"outline"}
               >
                 <ChevronLeftIcon />
               </Button>
-              <Button
-                aria-label={"Go to next step"}
-                onClick={handleNextStep}
-                size={"icon"}
-                variant={"outline"}
-              >
-                <ChevronRightIcon />
-              </Button>
+              {currentStep === onboardingSteps.length - 2 && (
+                <Button type={"submit"}>
+                  Find my match <ChevronRightIcon className={"ml-2 h-5 w-5"} />
+                </Button>
+              )}
+              {currentStep < onboardingSteps.length - 2 && (
+                <Button
+                  aria-label={"Go to next step"}
+                  onClick={handleNextStep}
+                  size={"icon"}
+                  type={"button"}
+                  variant={"outline"}
+                >
+                  <ChevronRightIcon />
+                </Button>
+              )}
             </div>
           </div>
         </form>
