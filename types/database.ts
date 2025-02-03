@@ -185,6 +185,35 @@ export type Database = {
           },
         ];
       };
+      match_results: {
+        Row: {
+          created_at: string;
+          id: number;
+          onboarding_profile_id: number;
+          updated_at: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          id?: number;
+          onboarding_profile_id: number;
+          updated_at?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          id?: number;
+          onboarding_profile_id?: number;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "match_results_onboarding_profile_id_fkey";
+            columns: ["onboarding_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "onboarding_profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       onboarding_profiles: {
         Row: {
           city_id: number | null;
