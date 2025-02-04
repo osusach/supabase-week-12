@@ -70,10 +70,10 @@ export async function matchScholarships(
             academicBackground.intendedFieldOfStudyId ?? null,
           last_name: basicInformation.lastName,
           onboarding_data: {
-            additional_notes: personalInterests.additionalNotes,
+            additional_notes: personalInterests.additionalNotes ?? null,
             graduation_year: academicBackground.graduationYear ?? null,
             last_attended_institution:
-              academicBackground.currentOrLastInstitution ?? null,
+              academicBackground.lastAttendedInstitution ?? null,
           },
           status: "completed",
           user_id: user.id,
