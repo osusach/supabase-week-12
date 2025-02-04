@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
-import type { Tables } from "@/types/database";
+import type { Scholarship } from "@/actions/scholarships";
+import type { Json, Tables } from "@/types/database";
 
 export type City = Pick<Tables<"cities">, "id" | "name" | "state_id">;
 
@@ -108,6 +109,162 @@ export async function fetchFormOptions(): Promise<
   ]);
 
   return data;
+}
+
+export type MatchScholarship = {
+  scholarship_id: number;
+  scholarship: Scholarship;
+};
+
+export type MatchResult = {
+  id: number;
+  match_scholarships: Array<MatchScholarship>;
+};
+
+export type OnboardingProfile = Omit<
+  Tables<"onboarding_profiles">,
+  | "city_id"
+  | "embedding"
+  | "field_of_study_id"
+  | "intended_field_of_study_id"
+  | "onboarding_data"
+  | "user_id"
+  | "updated_at"
+> & {
+  additional_notes: Json;
+  city: {
+    id: number;
+    name: string;
+    state: {
+      id: number;
+      country_id: number;
+      name: string;
+    };
+  } | null;
+  extracurricular_activities: Array<{ id: number; name: string }> | null;
+  field_of_study: { id: number; name: string } | null;
+  graduation_year: Json;
+  intended_field_of_study: { id: number; name: string } | null;
+  last_attended_institution: Json;
+};
+
+export type OnboardingMatch = {
+  matchResult: MatchResult | null;
+  onboardingProfile: OnboardingProfile | null;
+};
+
+export async function fetchOnboardingMatch(): Promise<OnboardingMatch> {
+  const supabase = await createClient();
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      throw new Error("User not authenticated");
+    }
+
+    const { data: onboardingProfile, error: onboardingProfileError } =
+      await supabase
+        .from("onboarding_profiles")
+        .select(
+          `
+        id,
+        created_at,
+        city:cities (
+          id,
+          name,
+          state:states (
+            id,
+            country_id,
+            name
+          )
+        ),
+        date_of_birth,
+        education_level,
+        field_of_study:fields_of_study!field_of_study_id (
+          id,
+          name
+        ),
+        first_name,
+        gender,
+        intended_field_of_study:fields_of_study!intended_field_of_study_id (
+          id,
+          name
+        ),
+        last_name,
+        match_results (
+          id,
+          match_scholarships (
+            scholarship_id,
+            scholarship:scholarships (
+              id,
+              content,
+              name,
+              url
+            )
+          )
+        ),
+        onboarding_data->additional_notes,
+        onboarding_data->graduation_year,
+        onboarding_data->last_attended_institution,
+        status
+        `,
+        )
+        .eq("user_id", user.id)
+        .eq("status", "completed")
+        .order("created_at", {
+          ascending: false,
+          referencedTable: "match_results",
+        })
+        .limit(1, { referencedTable: "match_results" })
+        .maybeSingle();
+
+    if (onboardingProfileError) {
+      throw new Error(onboardingProfileError.message);
+    }
+
+    if (!onboardingProfile) {
+      return {
+        matchResult: null,
+        onboardingProfile: null,
+      };
+    }
+
+    const { data: extracurriculars, error: extracurricularsError } =
+      await supabase
+        .from("user_extracurricular_activities")
+        .select(
+          `
+          extracurricular_activities (
+            id,
+            name
+          )
+          `,
+        )
+        .eq("user_id", user.id);
+
+    if (extracurricularsError) {
+      throw new Error(extracurricularsError.message);
+    }
+
+    const { match_results: matchResults, ...onboardingData } =
+      onboardingProfile;
+
+    return {
+      matchResult: matchResults[0],
+      onboardingProfile: {
+        ...onboardingData,
+        extracurricular_activities: extracurriculars.map((activity) => ({
+          id: activity.extracurricular_activities.id,
+          name: activity.extracurricular_activities.name,
+        })),
+      },
+    };
+  } catch (error) {
+    console.error("Database error:", error);
+    throw new Error("Failed to fetch onboarding match results.");
+  }
 }
 
 export type State = Pick<Tables<"states">, "id" | "name" | "country_id">;
