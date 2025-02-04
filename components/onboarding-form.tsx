@@ -118,13 +118,18 @@ interface OnboardingFormProps {
 
 export default function OnboardingForm({
   formOptions,
+  matchResult,
   onboardingProfile,
 }: OnboardingFormProps) {
   const [birthDate, setBirthDate] = useState<Date>(new Date());
-  const [currentStep, setCurrentStep] = useState<number>(0);
+  const [currentStep, setCurrentStep] = useState<number>(
+    onboardingProfile ? 3 : 0,
+  );
   const [message, setMessage] = useState<string | null>(null);
   const [scholarships, setScholarships] = useState<Array<Scholarship> | null>(
-    null,
+    matchResult?.match_scholarships?.map(
+      (scholarship) => scholarship.scholarship,
+    ) ?? null,
   );
   const defaultCountry = formOptions.countries.find(
     (country) => country.name === "Chile",
@@ -209,6 +214,9 @@ export default function OnboardingForm({
   const onSubmit = async (values: OnboardingSchema) => {
     setCurrentStep((step) => step + 1);
 
+    // Skip submission if the onboarding profile already exists
+    if (onboardingProfile !== null) return;
+
     const response = await matchScholarships(values);
 
     if (!response.success) {
@@ -267,7 +275,12 @@ export default function OnboardingForm({
                           First name<span aria-hidden={true}>*</span>
                         </FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input
+                            disabled={
+                              !!onboardingProfile || form.formState.isSubmitting
+                            }
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -282,7 +295,12 @@ export default function OnboardingForm({
                           Last name<span aria-hidden={true}>*</span>
                         </FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input
+                            disabled={
+                              !!onboardingProfile || form.formState.isSubmitting
+                            }
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -300,6 +318,9 @@ export default function OnboardingForm({
                         </FormLabel>
                         <Select
                           defaultValue={field.value?.toString()}
+                          disabled={
+                            !!onboardingProfile || form.formState.isSubmitting
+                          }
                           onValueChange={field.onChange}
                         >
                           <FormControl>
@@ -336,6 +357,9 @@ export default function OnboardingForm({
                         </FormLabel>
                         <Select
                           defaultValue={field.value?.toString()}
+                          disabled={
+                            !!onboardingProfile || form.formState.isSubmitting
+                          }
                           onValueChange={field.onChange}
                         >
                           <FormControl>
@@ -375,7 +399,12 @@ export default function OnboardingForm({
                           Date of birth<span aria-hidden={true}>*</span>
                         </FormLabel>
                         <Popover>
-                          <PopoverTrigger asChild>
+                          <PopoverTrigger
+                            disabled={
+                              !!onboardingProfile || form.formState.isSubmitting
+                            }
+                            asChild
+                          >
                             <FormControl>
                               <Button
                                 className={cn(
@@ -462,6 +491,9 @@ export default function OnboardingForm({
                         <FormLabel>Gender</FormLabel>
                         <Select
                           defaultValue={field.value}
+                          disabled={
+                            !!onboardingProfile || form.formState.isSubmitting
+                          }
                           onValueChange={field.onChange}
                         >
                           <FormControl>
@@ -505,6 +537,9 @@ export default function OnboardingForm({
                         </FormLabel>
                         <Select
                           defaultValue={field.value}
+                          disabled={
+                            !!onboardingProfile || form.formState.isSubmitting
+                          }
                           onValueChange={field.onChange}
                         >
                           <FormControl>
@@ -538,7 +573,12 @@ export default function OnboardingForm({
                           Current or Most Recent School/Institution
                         </FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input
+                            disabled={
+                              !!onboardingProfile || form.formState.isSubmitting
+                            }
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -554,6 +594,9 @@ export default function OnboardingForm({
                         <FormLabel>Graduation Year</FormLabel>
                         <Select
                           defaultValue={field.value?.toString()}
+                          disabled={
+                            !!onboardingProfile || form.formState.isSubmitting
+                          }
                           onValueChange={field.onChange}
                         >
                           <FormControl>
@@ -586,6 +629,9 @@ export default function OnboardingForm({
                           <FormLabel>Intended Field of Study</FormLabel>
                           <Select
                             defaultValue={field.value?.toString()}
+                            disabled={
+                              !!onboardingProfile || form.formState.isSubmitting
+                            }
                             onValueChange={field.onChange}
                           >
                             <FormControl>
@@ -619,6 +665,9 @@ export default function OnboardingForm({
                           <FormLabel>Field of Study</FormLabel>
                           <Select
                             defaultValue={field.value?.toString()}
+                            disabled={
+                              !!onboardingProfile || form.formState.isSubmitting
+                            }
                             onValueChange={field.onChange}
                           >
                             <FormControl>
@@ -681,6 +730,10 @@ export default function OnboardingForm({
                                       checked={field.value?.includes(
                                         activity.id,
                                       )}
+                                      disabled={
+                                        !!onboardingProfile ||
+                                        form.formState.isSubmitting
+                                      }
                                       onCheckedChange={(checked) => {
                                         return checked
                                           ? field.onChange([
@@ -721,6 +774,9 @@ export default function OnboardingForm({
                         <FormControl>
                           <Textarea
                             className={"resize-none"}
+                            disabled={
+                              !!onboardingProfile || form.formState.isSubmitting
+                            }
                             placeholder={"Tell us a little bit about yourself"}
                             {...field}
                           />
@@ -784,7 +840,7 @@ export default function OnboardingForm({
                 <ChevronLeftIcon />
               </Button>
               {currentStep === onboardingSteps.length - 2 && (
-                <Button type={"submit"}>
+                <Button disabled={form.formState.isSubmitting} type={"submit"}>
                   Find my match <ChevronRightIcon className={"ml-2 h-5 w-5"} />
                 </Button>
               )}
