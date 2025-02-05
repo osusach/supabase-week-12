@@ -70,16 +70,17 @@ export async function matchScholarships(
             academicBackground.intendedFieldOfStudyId ?? null,
           last_name: basicInformation.lastName,
           onboarding_data: {
-            additional_notes: personalInterests.additionalNotes,
+            additional_notes: personalInterests.additionalNotes ?? null,
             graduation_year: academicBackground.graduationYear ?? null,
             last_attended_institution:
-              academicBackground.currentOrLastInstitution ?? null,
+              academicBackground.lastAttendedInstitution ?? null,
           },
           status: "completed",
           user_id: user.id,
         })
         .select(
           `
+        id,
         city:cities (
           name,
           state:states (
@@ -173,6 +174,40 @@ export async function matchScholarships(
     if (scholarshipsError) {
       console.error("Database error:", scholarshipsError.message);
       throw new Error("Error generating scholarship match.");
+    }
+
+    // Save match
+    const { data: matchResults, error: matchResultsError } = await supabase
+      .from("match_results")
+      .insert({ onboarding_profile_id: onboardingProfile.id })
+      .select();
+
+    if (matchResultsError) {
+      console.error("Database error:", matchResultsError.message);
+      throw new Error("Error saving match.");
+    }
+
+    if (!scholarships.length) {
+      // Early return when no matches are found
+      return {
+        data: [],
+        success: true,
+      };
+    }
+
+    // Save match scholarships
+    const { error: matchScholarshipsError } = await supabase
+      .from("match_scholarships")
+      .insert(
+        scholarships.map((scholarship) => ({
+          match_result_id: matchResults[0].id,
+          scholarship_id: scholarship.id,
+        })),
+      );
+
+    if (matchScholarshipsError) {
+      console.error("Database error:", matchScholarshipsError.message);
+      throw new Error("Error saving match scholarships.");
     }
 
     return {

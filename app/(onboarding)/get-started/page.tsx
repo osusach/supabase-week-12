@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { fetchFormOptions } from "@/lib/data";
+import { fetchFormOptions, fetchOnboardingMatch } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "Onboarding",
@@ -17,6 +17,7 @@ export const metadata: Metadata = {
 export default async function GetStartedPage() {
   const [cities, countries, extracurricularActivities, fieldsOfStudy, states] =
     await fetchFormOptions();
+  const { matchResult, onboardingProfile } = await fetchOnboardingMatch();
 
   return (
     <Card className={"w-full max-w-2xl mx-auto"}>
@@ -37,6 +38,8 @@ export default async function GetStartedPage() {
             fieldsOfStudy,
             states,
           }}
+          matchResult={matchResult}
+          onboardingProfile={onboardingProfile}
         />
       </CardContent>
     </Card>

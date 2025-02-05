@@ -9,7 +9,14 @@ import {
   RocketIcon,
   UserIcon,
 } from "lucide-react";
-import { format, getMonth, getYear, setMonth, setYear } from "date-fns";
+import {
+  format,
+  getMonth,
+  getYear,
+  parseISO,
+  setMonth,
+  setYear,
+} from "date-fns";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -59,6 +66,8 @@ import type {
   Country,
   ExtracurricularActivity,
   FieldOfStudy,
+  MatchResult,
+  OnboardingProfile,
   State,
 } from "@/lib/data";
 
@@ -79,7 +88,7 @@ const onboardingSteps = [
   {
     fields: [
       "academicBackground.educationLevel",
-      "academicBackground.currentOrLastInstitution",
+      "academicBackground.lastAttendedInstitution",
       "academicBackground.fieldOfStudyId",
       "academicBackground.graduationYear",
       "academicBackground.intendedFieldOfStudyId",
@@ -103,14 +112,24 @@ interface OnboardingFormProps {
     fieldsOfStudy: FieldOfStudy[];
     states: State[];
   };
+  matchResult: MatchResult | null;
+  onboardingProfile: OnboardingProfile | null;
 }
 
-export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
+export default function OnboardingForm({
+  formOptions,
+  matchResult,
+  onboardingProfile,
+}: OnboardingFormProps) {
   const [birthDate, setBirthDate] = useState<Date>(new Date());
-  const [currentStep, setCurrentStep] = useState<number>(0);
+  const [currentStep, setCurrentStep] = useState<number>(
+    onboardingProfile ? 3 : 0,
+  );
   const [message, setMessage] = useState<string | null>(null);
   const [scholarships, setScholarships] = useState<Array<Scholarship> | null>(
-    null,
+    matchResult?.match_scholarships?.map(
+      (scholarship) => scholarship.scholarship,
+    ) ?? null,
   );
   const defaultCountry = formOptions.countries.find(
     (country) => country.name === "Chile",
@@ -119,19 +138,33 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
   const form = useForm<OnboardingSchema>({
     defaultValues: {
       academicBackground: {
-        currentOrLastInstitution: "",
-        fieldOfStudyId: null,
-        graduationYear: null,
-        intendedFieldOfStudyId: null,
+        educationLevel: onboardingProfile?.education_level ?? undefined,
+        fieldOfStudyId: onboardingProfile?.field_of_study?.id,
+        graduationYear:
+          (onboardingProfile?.graduation_year as number | null) ?? undefined,
+        intendedFieldOfStudyId: onboardingProfile?.intended_field_of_study?.id,
+        lastAttendedInstitution:
+          (onboardingProfile?.last_attended_institution as string | null) ?? "",
       },
       basicInformation: {
-        firstName: "",
-        lastName: "",
-        countryId: defaultCountry?.id,
+        cityId: onboardingProfile?.city?.id,
+        dateOfBirth: onboardingProfile?.date_of_birth
+          ? parseISO(onboardingProfile.date_of_birth)
+          : undefined,
+        firstName: onboardingProfile?.first_name ?? "",
+        gender: onboardingProfile?.gender ?? undefined,
+        lastName: onboardingProfile?.last_name ?? "",
+        countryId:
+          onboardingProfile?.city?.state.country_id ?? defaultCountry?.id,
+        stateId: onboardingProfile?.city?.state.id,
       },
       personalInterests: {
-        additionalNotes: "",
-        extracurricularsIds: [],
+        additionalNotes:
+          (onboardingProfile?.additional_notes as string | null) ?? "",
+        extracurricularsIds:
+          onboardingProfile?.extracurricular_activities?.map(
+            (activity) => activity.id,
+          ) ?? [],
       },
     },
     resolver: zodResolver(onboardingSchema),
@@ -141,7 +174,13 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
   // Casting to 'unknown' and then to 'string' to resolve a type conflict
   // caused by 'react-hook-form' returning a number type from the schema,
   // while select values are strings.
-  const stateId = form.watch("basicInformation.stateId") as unknown as string;
+  const stateId =
+    typeof form.watch("basicInformation.stateId") === "string"
+      ? parseInt(
+          form.watch("basicInformation.stateId") as unknown as string,
+          10,
+        )
+      : form.watch("basicInformation.stateId");
 
   const handleMonthChange = (month: string) => {
     const date = setMonth(birthDate, months.indexOf(month));
@@ -174,6 +213,9 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
 
   const onSubmit = async (values: OnboardingSchema) => {
     setCurrentStep((step) => step + 1);
+
+    // Skip submission if the onboarding profile already exists
+    if (onboardingProfile !== null) return;
 
     const response = await matchScholarships(values);
 
@@ -233,7 +275,12 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                           First name<span aria-hidden={true}>*</span>
                         </FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input
+                            disabled={
+                              !!onboardingProfile || form.formState.isSubmitting
+                            }
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -248,7 +295,12 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                           Last name<span aria-hidden={true}>*</span>
                         </FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input
+                            disabled={
+                              !!onboardingProfile || form.formState.isSubmitting
+                            }
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -266,6 +318,9 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                         </FormLabel>
                         <Select
                           defaultValue={field.value?.toString()}
+                          disabled={
+                            !!onboardingProfile || form.formState.isSubmitting
+                          }
                           onValueChange={field.onChange}
                         >
                           <FormControl>
@@ -302,6 +357,9 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                         </FormLabel>
                         <Select
                           defaultValue={field.value?.toString()}
+                          disabled={
+                            !!onboardingProfile || form.formState.isSubmitting
+                          }
                           onValueChange={field.onChange}
                         >
                           <FormControl>
@@ -314,7 +372,7 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                           <SelectContent>
                             {formOptions.cities
                               .filter(
-                                (city) => city.state_id.toString() === stateId,
+                                (city) => !stateId || city.state_id === stateId,
                               )
                               .map((city) => (
                                 <SelectItem
@@ -341,7 +399,12 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                           Date of birth<span aria-hidden={true}>*</span>
                         </FormLabel>
                         <Popover>
-                          <PopoverTrigger asChild>
+                          <PopoverTrigger
+                            disabled={
+                              !!onboardingProfile || form.formState.isSubmitting
+                            }
+                            asChild
+                          >
                             <FormControl>
                               <Button
                                 className={cn(
@@ -428,6 +491,9 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                         <FormLabel>Gender</FormLabel>
                         <Select
                           defaultValue={field.value}
+                          disabled={
+                            !!onboardingProfile || form.formState.isSubmitting
+                          }
                           onValueChange={field.onChange}
                         >
                           <FormControl>
@@ -471,6 +537,9 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                         </FormLabel>
                         <Select
                           defaultValue={field.value}
+                          disabled={
+                            !!onboardingProfile || form.formState.isSubmitting
+                          }
                           onValueChange={field.onChange}
                         >
                           <FormControl>
@@ -491,19 +560,25 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                             ))}
                           </SelectContent>
                         </Select>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
                   <FormField
                     control={form.control}
-                    name={"academicBackground.currentOrLastInstitution"}
+                    name={"academicBackground.lastAttendedInstitution"}
                     render={({ field }) => (
                       <FormItem className={"space-y-2"}>
                         <FormLabel>
                           Current or Most Recent School/Institution
                         </FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input
+                            disabled={
+                              !!onboardingProfile || form.formState.isSubmitting
+                            }
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -519,6 +594,9 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                         <FormLabel>Graduation Year</FormLabel>
                         <Select
                           defaultValue={field.value?.toString()}
+                          disabled={
+                            !!onboardingProfile || form.formState.isSubmitting
+                          }
                           onValueChange={field.onChange}
                         >
                           <FormControl>
@@ -551,6 +629,9 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                           <FormLabel>Intended Field of Study</FormLabel>
                           <Select
                             defaultValue={field.value?.toString()}
+                            disabled={
+                              !!onboardingProfile || form.formState.isSubmitting
+                            }
                             onValueChange={field.onChange}
                           >
                             <FormControl>
@@ -584,6 +665,9 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                           <FormLabel>Field of Study</FormLabel>
                           <Select
                             defaultValue={field.value?.toString()}
+                            disabled={
+                              !!onboardingProfile || form.formState.isSubmitting
+                            }
                             onValueChange={field.onChange}
                           >
                             <FormControl>
@@ -646,6 +730,10 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                                       checked={field.value?.includes(
                                         activity.id,
                                       )}
+                                      disabled={
+                                        !!onboardingProfile ||
+                                        form.formState.isSubmitting
+                                      }
                                       onCheckedChange={(checked) => {
                                         return checked
                                           ? field.onChange([
@@ -686,6 +774,9 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                         <FormControl>
                           <Textarea
                             className={"resize-none"}
+                            disabled={
+                              !!onboardingProfile || form.formState.isSubmitting
+                            }
                             placeholder={"Tell us a little bit about yourself"}
                             {...field}
                           />
@@ -749,7 +840,7 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                 <ChevronLeftIcon />
               </Button>
               {currentStep === onboardingSteps.length - 2 && (
-                <Button type={"submit"}>
+                <Button disabled={form.formState.isSubmitting} type={"submit"}>
                   Find my match <ChevronRightIcon className={"ml-2 h-5 w-5"} />
                 </Button>
               )}

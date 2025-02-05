@@ -185,6 +185,74 @@ export type Database = {
           },
         ];
       };
+      match_results: {
+        Row: {
+          created_at: string;
+          id: number;
+          onboarding_profile_id: number;
+          updated_at: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          id?: number;
+          onboarding_profile_id: number;
+          updated_at?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          id?: number;
+          onboarding_profile_id?: number;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "match_results_onboarding_profile_id_fkey";
+            columns: ["onboarding_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "onboarding_profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      match_scholarships: {
+        Row: {
+          created_at: string;
+          id: number;
+          match_result_id: number;
+          scholarship_id: number;
+          updated_at: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          id?: number;
+          match_result_id: number;
+          scholarship_id: number;
+          updated_at?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          id?: number;
+          match_result_id?: number;
+          scholarship_id?: number;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "match_scholarships_match_result_id_fkey";
+            columns: ["match_result_id"];
+            isOneToOne: false;
+            referencedRelation: "match_results";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "match_scholarships_scholarship_id_fkey";
+            columns: ["scholarship_id"];
+            isOneToOne: false;
+            referencedRelation: "scholarships";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       onboarding_profiles: {
         Row: {
           city_id: number | null;
