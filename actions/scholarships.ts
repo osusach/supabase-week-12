@@ -8,8 +8,59 @@ import {
   onboardingSchema,
   type OnboardingSchema,
 } from "@/lib/schemas/onboarding-schema";
+import {
+  matchFeedbackSchema,
+  type MatchFeedbackSchema,
+} from "@/lib/schemas/match-feedback-schema";
 import { translations } from "@/config/translations";
 import type { Tables } from "@/types/database";
+
+const defaultTranslations = translations["es"];
+
+export async function createMatchResultFeedback(
+  matchResultId: number,
+  body: MatchFeedbackSchema,
+) {
+  const supabase = await createClient();
+
+  const validatedFields = matchFeedbackSchema.safeParse(body);
+
+  if (!validatedFields.success) {
+    return {
+      data: null,
+      message: "Invalid form data.",
+      success: false,
+    };
+  }
+
+  try {
+    const { error } = await supabase.from("match_feedback").insert({
+      contact_permission: validatedFields.data.contactPermission === "yes",
+      improvement_notes: validatedFields.data.improvementNotes,
+      match_relevance_rating: validatedFields.data.matchRelevanceRating,
+      match_result_id: matchResultId,
+    });
+
+    if (error) {
+      console.error("Database error:", error.message);
+      throw new Error("Error saving match result feedback.");
+    }
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error(
+      "Server error:",
+      error instanceof Error ? error.message : error,
+    );
+    return {
+      data: null,
+      message: "An unexpected error occurred. Please try again later",
+      success: false,
+    };
+  }
+}
 
 export type Scholarship = Pick<
   Tables<"scholarships">,
@@ -21,8 +72,6 @@ type MatchScholarshipsResponse = {
   message?: string;
   success: boolean;
 };
-
-const defaultTranslations = translations["es"];
 
 export async function matchScholarships(
   body: OnboardingSchema,
