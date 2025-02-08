@@ -42,6 +42,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { MatchFeedback } from "@/components/match-feedback";
 import {
   Popover,
   PopoverContent,
@@ -221,7 +222,7 @@ function Onboarding({
   const onSubmit = async (values: OnboardingSchema) => {
     setCurrentStep((step) => step + 1);
 
-    // Skip submission if the onboarding profile already exists
+    // Skip submission if a match already exists
     if (scholarships !== null) return;
 
     const response = await matchScholarships(values);
@@ -879,6 +880,23 @@ function Onboarding({
           </Form>
         </CardContent>
       </Card>
+      <section className={"max-w-md mx-auto"}>
+        {scholarships && !matchResult?.match_feedback.length ? (
+          <>
+            <p className={"text-sm text-center mb-3"}>
+              <span className={"font-semibold"}>Help us improve!</span> We&#39;d
+              love your thoughts on your scholarship matches. Click the button
+              below to share your feedback.
+            </p>
+            <MatchFeedback matchResultId={matchResult?.id} />
+          </>
+        ) : scholarships ? (
+          <p className={"text-sm text-center"}>
+            Your feedback has been submitted successfully. Thank you for helping
+            us improve!
+          </p>
+        ) : null}
+      </section>
     </div>
   );
 }
