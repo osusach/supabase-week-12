@@ -111,6 +111,10 @@ export async function fetchFormOptions(): Promise<
   return data;
 }
 
+export type MatchFeedback = {
+  match_relevance_rating: number;
+};
+
 export type MatchScholarship = {
   scholarship_id: number;
   scholarship: Scholarship;
@@ -118,6 +122,7 @@ export type MatchScholarship = {
 
 export type MatchResult = {
   id: number;
+  match_feedback: MatchFeedback[];
   match_scholarships: Array<MatchScholarship>;
 };
 
@@ -195,6 +200,9 @@ export async function fetchOnboardingMatch(): Promise<OnboardingMatch> {
         last_name,
         match_results (
           id,
+          match_feedback (
+            match_relevance_rating
+          ),
           match_scholarships (
             scholarship_id,
             scholarship:scholarships (
