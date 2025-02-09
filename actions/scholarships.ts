@@ -62,13 +62,23 @@ export async function createMatchResultFeedback(
   }
 }
 
-export type Scholarship = Pick<
+export type MatchFeedback = {
+  match_relevance_rating: number;
+};
+
+export type MatchResult = {
+  id: number;
+  match_feedback: Array<MatchFeedback>;
+  match_scholarships: Array<MatchScholarship>;
+};
+
+export type MatchScholarship = Pick<
   Tables<"scholarships">,
   "id" | "content" | "name" | "url"
 >;
 
 type MatchScholarshipsResponse = {
-  data: Array<Scholarship> | null;
+  data: MatchResult | null;
   message?: string;
   success: boolean;
 };
@@ -228,8 +238,21 @@ export async function matchScholarships(
     // Save match
     const { data: matchResults, error: matchResultsError } = await supabase
       .from("match_results")
-      .insert({ onboarding_profile_id: onboardingProfile.id })
-      .select();
+      .insert({ onboarding_profile_id: onboardingProfile.id }).select(`
+        id,
+        match_feedback (
+          match_relevance_rating
+        ),
+        match_scholarships (
+          scholarship_id,
+          scholarship:scholarships (
+            id,
+            content,
+            name,
+            url
+          )
+        )
+      `);
 
     if (matchResultsError) {
       console.error("Database error:", matchResultsError.message);
@@ -239,20 +262,31 @@ export async function matchScholarships(
     if (!scholarships.length) {
       // Early return when no matches are found
       return {
-        data: [],
+        data: {
+          ...matchResults[0],
+          match_feedback: [],
+          match_scholarships: [],
+        },
         success: true,
       };
     }
 
     // Save match scholarships
-    const { error: matchScholarshipsError } = await supabase
-      .from("match_scholarships")
-      .insert(
+    const { data: matchScholarships, error: matchScholarshipsError } =
+      await supabase.from("match_scholarships").insert(
         scholarships.map((scholarship) => ({
           match_result_id: matchResults[0].id,
           scholarship_id: scholarship.id,
         })),
-      );
+      ).select(`
+        id,
+        scholarship:scholarships (
+          id,
+          content,
+          name,
+          url
+        )
+        `);
 
     if (matchScholarshipsError) {
       console.error("Database error:", matchScholarshipsError.message);
@@ -260,7 +294,11 @@ export async function matchScholarships(
     }
 
     return {
-      data: scholarships,
+      data: {
+        ...matchResults[0],
+        match_feedback: [],
+        match_scholarships: matchScholarships.map((item) => item.scholarship),
+      },
       success: true,
     };
   } catch (error) {

@@ -63,7 +63,7 @@ import {
   graduationYears,
   months,
 } from "@/config/form-options";
-import { matchScholarships, type Scholarship } from "@/actions/scholarships";
+import { matchScholarships, type MatchResult } from "@/actions/scholarships";
 import {
   onboardingSchema,
   type OnboardingSchema,
@@ -73,7 +73,6 @@ import type {
   Country,
   ExtracurricularActivity,
   FieldOfStudy,
-  MatchResult,
   OnboardingProfile,
   State,
 } from "@/lib/data";
@@ -134,11 +133,7 @@ function Onboarding({
     onboardingProfile ? 3 : 0,
   );
   const [message, setMessage] = useState<string | null>(null);
-  const [scholarships, setScholarships] = useState<Array<Scholarship> | null>(
-    matchResult?.match_scholarships?.map(
-      (scholarship) => scholarship.scholarship,
-    ) ?? null,
-  );
+  const [match, setMatch] = useState<MatchResult | null>(matchResult);
 
   const defaultCountry = formOptions.countries.find(
     (country) => country.name === "Chile",
@@ -223,7 +218,7 @@ function Onboarding({
     setCurrentStep((step) => step + 1);
 
     // Skip submission if a match already exists
-    if (scholarships !== null) return;
+    if (match !== null) return;
 
     const response = await matchScholarships(values);
 
@@ -231,7 +226,7 @@ function Onboarding({
       setMessage(response.message ?? "An error occurred.");
     }
 
-    setScholarships(response.data);
+    setMatch(response.data);
   };
 
   return (
@@ -816,7 +811,8 @@ function Onboarding({
                         <p className={"text-center max-w-md"}>{message}</p>
                       )}
 
-                      {scholarships && scholarships.length > 0 ? (
+                      {match?.match_scholarships &&
+                      match.match_scholarships.length > 0 ? (
                         <div>
                           <h2
                             className={"text-center text-xl font-medium mb-4"}
@@ -824,14 +820,14 @@ function Onboarding({
                             Top results
                           </h2>
                           <ul className={"space-y-3"}>
-                            {scholarships.map((scholarship) => (
+                            {match.match_scholarships.map((scholarship) => (
                               <li key={scholarship.id}>
                                 <ScholarshipCard scholarship={scholarship} />
                               </li>
                             ))}
                           </ul>
                         </div>
-                      ) : scholarships?.length === 0 ? (
+                      ) : match?.match_scholarships.length === 0 ? (
                         <p className={"text-center max-w-md md:mx-auto"}>
                           Sorry, we couldn&#39;t find any scholarships that
                           match your profile at the moment.
@@ -881,16 +877,16 @@ function Onboarding({
         </CardContent>
       </Card>
       <section className={"max-w-md mx-auto"}>
-        {scholarships && !matchResult?.match_feedback.length ? (
+        {match?.match_scholarships && !match.match_feedback.length ? (
           <>
             <p className={"text-sm text-center mb-3"}>
               <span className={"font-semibold"}>Help us improve!</span> We&#39;d
               love your thoughts on your scholarship matches. Click the button
               below to share your feedback.
             </p>
-            <MatchFeedback matchResultId={matchResult?.id} />
+            <MatchFeedback matchResultId={match.id} />
           </>
-        ) : scholarships ? (
+        ) : match?.match_scholarships ? (
           <p className={"text-sm text-center"}>
             Your feedback has been submitted successfully. Thank you for helping
             us improve!

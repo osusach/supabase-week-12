@@ -1,5 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
-import type { Scholarship } from "@/actions/scholarships";
+import type { MatchResult } from "@/actions/scholarships";
 import type { Json, Tables } from "@/types/database";
 
 export type City = Pick<Tables<"cities">, "id" | "name" | "state_id">;
@@ -113,17 +113,6 @@ export async function fetchFormOptions(): Promise<
 
 export type MatchFeedback = {
   match_relevance_rating: number;
-};
-
-export type MatchScholarship = {
-  scholarship_id: number;
-  scholarship: Scholarship;
-};
-
-export type MatchResult = {
-  id: number;
-  match_feedback: MatchFeedback[];
-  match_scholarships: Array<MatchScholarship>;
 };
 
 export type OnboardingProfile = Omit<
@@ -260,7 +249,12 @@ export async function fetchOnboardingMatch(): Promise<OnboardingMatch> {
       onboardingProfile;
 
     return {
-      matchResult: matchResults[0],
+      matchResult: {
+        ...matchResults[0],
+        match_scholarships: matchResults[0].match_scholarships.map(
+          (item) => item.scholarship,
+        ),
+      },
       onboardingProfile: {
         ...onboardingData,
         extracurricular_activities: extracurriculars.map((activity) => ({

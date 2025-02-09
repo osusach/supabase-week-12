@@ -5,10 +5,10 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { Scholarship } from "@/actions/scholarships";
+import type { MatchScholarship } from "@/actions/scholarships";
 
 interface ScholarshipCardProps {
-  scholarship: Scholarship;
+  scholarship: MatchScholarship;
 }
 
 export default function ScholarshipCard({ scholarship }: ScholarshipCardProps) {
