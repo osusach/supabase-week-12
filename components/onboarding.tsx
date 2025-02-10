@@ -9,7 +9,14 @@ import {
   RocketIcon,
   UserIcon,
 } from "lucide-react";
-import { format, getMonth, getYear, setMonth, setYear } from "date-fns";
+import {
+  format,
+  getMonth,
+  getYear,
+  parseISO,
+  setMonth,
+  setYear,
+} from "date-fns";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +24,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import ScholarshipCard from "@/components/scholarship-card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
@@ -28,6 +42,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { MatchFeedback } from "@/components/match-feedback";
 import {
   Popover,
   PopoverContent,
@@ -48,19 +63,20 @@ import {
   graduationYears,
   months,
 } from "@/config/form-options";
-import { cn } from "@/lib/utils";
+import { matchScholarships, type MatchResult } from "@/actions/scholarships";
 import {
   onboardingSchema,
   type OnboardingSchema,
 } from "@/lib/schemas/onboarding-schema";
-import { matchScholarships, type Scholarship } from "@/actions/scholarships";
 import type {
   City,
   Country,
   ExtracurricularActivity,
   FieldOfStudy,
+  OnboardingProfile,
   State,
 } from "@/lib/data";
+import { cn } from "@/lib/utils";
 
 const onboardingSteps = [
   {
@@ -79,7 +95,7 @@ const onboardingSteps = [
   {
     fields: [
       "academicBackground.educationLevel",
-      "academicBackground.currentOrLastInstitution",
+      "academicBackground.lastAttendedInstitution",
       "academicBackground.fieldOfStudyId",
       "academicBackground.graduationYear",
       "academicBackground.intendedFieldOfStudyId",
@@ -95,7 +111,7 @@ const onboardingSteps = [
   { icon: PuzzleIcon, label: "Match" },
 ];
 
-interface OnboardingFormProps {
+interface OnboardingProps {
   formOptions: {
     cities: City[];
     countries: Country[];
@@ -103,35 +119,55 @@ interface OnboardingFormProps {
     fieldsOfStudy: FieldOfStudy[];
     states: State[];
   };
+  matchResult: MatchResult | null;
+  onboardingProfile: OnboardingProfile | null;
 }
 
-export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
+function Onboarding({
+  formOptions,
+  matchResult,
+  onboardingProfile,
+}: OnboardingProps) {
   const [birthDate, setBirthDate] = useState<Date>(new Date());
-  const [currentStep, setCurrentStep] = useState<number>(0);
-  const [message, setMessage] = useState<string | null>(null);
-  const [scholarships, setScholarships] = useState<Array<Scholarship> | null>(
-    null,
+  const [currentStep, setCurrentStep] = useState<number>(
+    onboardingProfile ? 3 : 0,
   );
+  const [message, setMessage] = useState<string | null>(null);
+  const [match, setMatch] = useState<MatchResult | null>(matchResult);
+
   const defaultCountry = formOptions.countries.find(
     (country) => country.name === "Chile",
   );
-
   const form = useForm<OnboardingSchema>({
     defaultValues: {
       academicBackground: {
-        currentOrLastInstitution: "",
-        fieldOfStudyId: null,
-        graduationYear: null,
-        intendedFieldOfStudyId: null,
+        educationLevel: onboardingProfile?.education_level ?? undefined,
+        fieldOfStudyId: onboardingProfile?.field_of_study?.id,
+        graduationYear:
+          (onboardingProfile?.graduation_year as number | null) ?? undefined,
+        intendedFieldOfStudyId: onboardingProfile?.intended_field_of_study?.id,
+        lastAttendedInstitution:
+          (onboardingProfile?.last_attended_institution as string | null) ?? "",
       },
       basicInformation: {
-        firstName: "",
-        lastName: "",
-        countryId: defaultCountry?.id,
+        cityId: onboardingProfile?.city?.id,
+        dateOfBirth: onboardingProfile?.date_of_birth
+          ? parseISO(onboardingProfile.date_of_birth)
+          : undefined,
+        firstName: onboardingProfile?.first_name ?? "",
+        gender: onboardingProfile?.gender ?? undefined,
+        lastName: onboardingProfile?.last_name ?? "",
+        countryId:
+          onboardingProfile?.city?.state.country_id ?? defaultCountry?.id,
+        stateId: onboardingProfile?.city?.state.id,
       },
       personalInterests: {
-        additionalNotes: "",
-        extracurricularsIds: [],
+        additionalNotes:
+          (onboardingProfile?.additional_notes as string | null) ?? "",
+        extracurricularsIds:
+          onboardingProfile?.extracurricular_activities?.map(
+            (activity) => activity.id,
+          ) ?? [],
       },
     },
     resolver: zodResolver(onboardingSchema),
@@ -141,15 +177,16 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
   // Casting to 'unknown' and then to 'string' to resolve a type conflict
   // caused by 'react-hook-form' returning a number type from the schema,
   // while select values are strings.
-  const stateId = form.watch("basicInformation.stateId") as unknown as string;
+  const stateId =
+    typeof form.watch("basicInformation.stateId") === "string"
+      ? parseInt(
+          form.watch("basicInformation.stateId") as unknown as string,
+          10,
+        )
+      : form.watch("basicInformation.stateId");
 
   const handleMonthChange = (month: string) => {
     const date = setMonth(birthDate, months.indexOf(month));
-    setBirthDate(date);
-  };
-
-  const handleYearChange = (year: string) => {
-    const date = setYear(birthDate, parseInt(year, 10));
     setBirthDate(date);
   };
 
@@ -172,8 +209,16 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
     setCurrentStep((step) => step - 1);
   };
 
+  const handleYearChange = (year: string) => {
+    const date = setYear(birthDate, parseInt(year, 10));
+    setBirthDate(date);
+  };
+
   const onSubmit = async (values: OnboardingSchema) => {
     setCurrentStep((step) => step + 1);
+
+    // Skip submission if a match already exists
+    if (match !== null) return;
 
     const response = await matchScholarships(values);
 
@@ -181,59 +226,76 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
       setMessage(response.message ?? "An error occurred.");
     }
 
-    setScholarships(response.data);
+    setMatch(response.data);
   };
 
   return (
-    <>
-      <nav aria-label={"Form progress"} className={"mb-5"}>
-        <ol className={"md:flex md:space-x-4"}>
-          {onboardingSteps.map((step, idx) => (
-            <li
-              className={cn(
-                "flex flex-col py-4 space-y-4 md:flex-1",
-                idx <= currentStep && "border-t-2 border-t-blue-500",
-                idx !== currentStep && "hidden md:flex",
-              )}
-              key={step.label}
-            >
-              <div
-                className={cn(
-                  "flex h-20 w-20 rounded-full mx-auto bg-slate-50 justify-center items-center",
-                  idx === currentStep && "ring ring-offset-2 ring-blue-500",
-                )}
-              >
-                <step.icon
+    <div>
+      <Card className={"w-full max-w-2xl mx-auto mb-5"}>
+        <CardHeader>
+          <CardTitle>Find your perfect scholarship match</CardTitle>
+          <CardDescription>
+            Tell us a little about yourself! Your responses will help us match
+            you with scholarships that align with your background and interests.
+            Fields marked with an asterisk (*) are required.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <nav aria-label={"Form progress"} className={"mb-5"}>
+            <ol className={"md:flex md:space-x-4"}>
+              {onboardingSteps.map((step, idx) => (
+                <li
                   className={cn(
-                    "h-8 w-8 text-muted-foreground",
-                    idx <= currentStep && "text-blue-500",
+                    "flex flex-col py-4 space-y-4 md:flex-1",
+                    idx <= currentStep && "border-t-2 border-t-blue-500",
+                    idx !== currentStep && "hidden md:flex",
                   )}
-                />
-              </div>
-              <span className={"text-center text-sm font-medium"}>
-                {step.label}
-              </span>
-            </li>
-          ))}
-        </ol>
-      </nav>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className={"space-y-5 md:space-y-10"}>
-            {/* Basic Info step */}
-            {currentStep === 0 && (
-              <>
-                <div className={"grid grid-cols-1 gap-5 md:grid-cols-2"}>
+                  key={step.label}
+                >
+                  <div
+                    className={cn(
+                      "flex h-20 w-20 rounded-full mx-auto bg-slate-50 justify-center items-center",
+                      idx === currentStep && "ring ring-offset-2 ring-blue-500",
+                    )}
+                  >
+                    <step.icon
+                      className={cn(
+                        "h-8 w-8 text-muted-foreground",
+                        idx <= currentStep && "text-blue-500",
+                      )}
+                    />
+                  </div>
+                  <span className={"text-center text-sm font-medium"}>
+                    {step.label}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </nav>
+
+          <Form {...form}>
+            <form
+              className={"grid grid-cols-1 gap-5 md:grid-cols-2"}
+              onSubmit={form.handleSubmit(onSubmit)}
+            >
+              {/* Basic Info step */}
+              {currentStep === 0 && (
+                <>
                   <FormField
                     control={form.control}
                     name={"basicInformation.firstName"}
                     render={({ field }) => (
-                      <FormItem className={"space-y-2"}>
+                      <FormItem className={"col-span-1 space-y-2"}>
                         <FormLabel>
                           First name<span aria-hidden={true}>*</span>
                         </FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input
+                            disabled={
+                              !!onboardingProfile || form.formState.isSubmitting
+                            }
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -243,29 +305,35 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                     control={form.control}
                     name={"basicInformation.lastName"}
                     render={({ field }) => (
-                      <FormItem className={"space-y-2"}>
+                      <FormItem className={"col-span-1 space-y-2"}>
                         <FormLabel>
                           Last name<span aria-hidden={true}>*</span>
                         </FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input
+                            disabled={
+                              !!onboardingProfile || form.formState.isSubmitting
+                            }
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                </div>
-                <div className={"grid grid-cols-1 gap-3 md:grid-cols-2"}>
                   <FormField
                     control={form.control}
                     name={"basicInformation.stateId"}
                     render={({ field }) => (
-                      <FormItem className={"space-y-2"}>
+                      <FormItem className={"col-span-1 space-y-2"}>
                         <FormLabel>
                           State<span aria-hidden={true}>*</span>
                         </FormLabel>
                         <Select
                           defaultValue={field.value?.toString()}
+                          disabled={
+                            !!onboardingProfile || form.formState.isSubmitting
+                          }
                           onValueChange={field.onChange}
                         >
                           <FormControl>
@@ -296,12 +364,15 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                     control={form.control}
                     name={"basicInformation.cityId"}
                     render={({ field }) => (
-                      <FormItem className={"space-y-2"}>
+                      <FormItem className={"col-span-1 space-y-2"}>
                         <FormLabel>
                           City<span aria-hidden={true}>*</span>
                         </FormLabel>
                         <Select
                           defaultValue={field.value?.toString()}
+                          disabled={
+                            !!onboardingProfile || form.formState.isSubmitting
+                          }
                           onValueChange={field.onChange}
                         >
                           <FormControl>
@@ -314,7 +385,7 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                           <SelectContent>
                             {formOptions.cities
                               .filter(
-                                (city) => city.state_id.toString() === stateId,
+                                (city) => !stateId || city.state_id === stateId,
                               )
                               .map((city) => (
                                 <SelectItem
@@ -330,18 +401,21 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                       </FormItem>
                     )}
                   />
-                </div>
-                <div className={"grid grid-cols-1 gap-3 md:grid-cols-2"}>
                   <FormField
                     control={form.control}
                     name={"basicInformation.dateOfBirth"}
                     render={({ field }) => (
-                      <FormItem className={"space-y-2"}>
+                      <FormItem className={"col-span-1 space-y-2"}>
                         <FormLabel>
                           Date of birth<span aria-hidden={true}>*</span>
                         </FormLabel>
                         <Popover>
-                          <PopoverTrigger asChild>
+                          <PopoverTrigger
+                            disabled={
+                              !!onboardingProfile || form.formState.isSubmitting
+                            }
+                            asChild
+                          >
                             <FormControl>
                               <Button
                                 className={cn(
@@ -424,10 +498,13 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                     control={form.control}
                     name={"basicInformation.gender"}
                     render={({ field }) => (
-                      <FormItem className={"space-y-2"}>
+                      <FormItem className={"col-span-1 space-y-2"}>
                         <FormLabel>Gender</FormLabel>
                         <Select
                           defaultValue={field.value}
+                          disabled={
+                            !!onboardingProfile || form.formState.isSubmitting
+                          }
                           onValueChange={field.onChange}
                         >
                           <FormControl>
@@ -452,25 +529,25 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                       </FormItem>
                     )}
                   />
-                </div>
-              </>
-            )}
-
-            {/* Academic Background step */}
-            {currentStep === 1 && (
-              <>
-                <div className={"grid grid-cols-1 gap-3 md:grid-cols-2"}>
+                </>
+              )}
+              {/* Academic Background step */}
+              {currentStep === 1 && (
+                <>
                   <FormField
                     control={form.control}
                     name={"academicBackground.educationLevel"}
                     render={({ field }) => (
-                      <FormItem className={"space-y-2"}>
+                      <FormItem className={"col-span-1 space-y-2"}>
                         <FormLabel>
                           Current Academic Level
                           <span aria-hidden={true}>*</span>
                         </FormLabel>
                         <Select
                           defaultValue={field.value}
+                          disabled={
+                            !!onboardingProfile || form.formState.isSubmitting
+                          }
                           onValueChange={field.onChange}
                         >
                           <FormControl>
@@ -491,34 +568,41 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                             ))}
                           </SelectContent>
                         </Select>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
                   <FormField
                     control={form.control}
-                    name={"academicBackground.currentOrLastInstitution"}
+                    name={"academicBackground.lastAttendedInstitution"}
                     render={({ field }) => (
-                      <FormItem className={"space-y-2"}>
+                      <FormItem className={"col-span-1 space-y-2"}>
                         <FormLabel>
                           Current or Most Recent School/Institution
                         </FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input
+                            disabled={
+                              !!onboardingProfile || form.formState.isSubmitting
+                            }
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                </div>
-                <div className={"grid grid-cols-1 gap-3 md:grid-cols-2"}>
                   <FormField
                     control={form.control}
                     name={"academicBackground.graduationYear"}
                     render={({ field }) => (
-                      <FormItem className={"space-y-2"}>
+                      <FormItem className={"col-span-1 space-y-2"}>
                         <FormLabel>Graduation Year</FormLabel>
                         <Select
                           defaultValue={field.value?.toString()}
+                          disabled={
+                            !!onboardingProfile || form.formState.isSubmitting
+                          }
                           onValueChange={field.onChange}
                         >
                           <FormControl>
@@ -547,10 +631,13 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                       control={form.control}
                       name={"academicBackground.intendedFieldOfStudyId"}
                       render={({ field }) => (
-                        <FormItem className={"space-y-2"}>
+                        <FormItem className={"col-span-1 space-y-2"}>
                           <FormLabel>Intended Field of Study</FormLabel>
                           <Select
                             defaultValue={field.value?.toString()}
+                            disabled={
+                              !!onboardingProfile || form.formState.isSubmitting
+                            }
                             onValueChange={field.onChange}
                           >
                             <FormControl>
@@ -580,10 +667,13 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                       control={form.control}
                       name={"academicBackground.fieldOfStudyId"}
                       render={({ field }) => (
-                        <FormItem className={"space-y-2"}>
+                        <FormItem className={"col-span-1 space-y-2"}>
                           <FormLabel>Field of Study</FormLabel>
                           <Select
                             defaultValue={field.value?.toString()}
+                            disabled={
+                              !!onboardingProfile || form.formState.isSubmitting
+                            }
                             onValueChange={field.onChange}
                           >
                             <FormControl>
@@ -608,20 +698,19 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                       )}
                     />
                   )}
-                </div>
-              </>
-            )}
-
-            {/* Career & Personal Interests step */}
-            {currentStep === 2 && (
-              <>
-                <div className={"grid grid-cols-1"}>
+                </>
+              )}
+              {/* Career & Personal Interests step */}
+              {currentStep === 2 && (
+                <>
                   <FormField
                     control={form.control}
                     name={"personalInterests.extracurricularsIds"}
                     render={() => (
-                      <FormItem>
-                        <div className={"mb-4"}>
+                      <FormItem
+                        className={"col-span-1 space-y-2 md:col-span-2"}
+                      >
+                        <div>
                           <FormLabel>Extracurricular Activities</FormLabel>
                           <FormDescription>
                             What activities do you enjoy participating in
@@ -646,6 +735,10 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                                       checked={field.value?.includes(
                                         activity.id,
                                       )}
+                                      disabled={
+                                        !!onboardingProfile ||
+                                        form.formState.isSubmitting
+                                      }
                                       onCheckedChange={(checked) => {
                                         return checked
                                           ? field.onChange([
@@ -672,20 +765,23 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                       </FormItem>
                     )}
                   />
-                </div>
-                <div className={"grid grid-cols-1"}>
                   <FormField
                     control={form.control}
                     name={"personalInterests.additionalNotes"}
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem
+                        className={"col-span-1 space-y-2 md:col-span-2"}
+                      >
                         <FormLabel>
                           Is there anything else you would like to share about
                           your interests or career goals?
                         </FormLabel>
                         <FormControl>
                           <Textarea
-                            className={"resize-none"}
+                            className={"min-h-[90px] resize-none"}
+                            disabled={
+                              !!onboardingProfile || form.formState.isSubmitting
+                            }
                             placeholder={"Tell us a little bit about yourself"}
                             {...field}
                           />
@@ -698,76 +794,107 @@ export default function OnboardingForm({ formOptions }: OnboardingFormProps) {
                       </FormItem>
                     )}
                   />
-                </div>
-              </>
-            )}
-
-            {/* Match results step */}
-            {currentStep === 3 && (
-              <div className={"flex flex-col justify-center items-center py-5"}>
-                {form.formState.isSubmitting ? (
-                  <div>Loading...</div>
-                ) : (
-                  <div>
-                    {message && (
-                      <p className={"text-center max-w-md"}>{message}</p>
-                    )}
-
-                    {scholarships && scholarships.length > 0 ? (
-                      <div>
-                        <h2 className={"text-center text-xl font-medium mb-4"}>
-                          Top results
-                        </h2>
-                        <ul className={"space-y-3"}>
-                          {scholarships.map((scholarship) => (
-                            <li key={scholarship.id}>
-                              <ScholarshipCard scholarship={scholarship} />
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ) : scholarships?.length === 0 ? (
-                      <p className={"text-center max-w-md"}>
-                        Sorry, we couldn&#39;t find any scholarships that match
-                        your profile at the moment.
-                      </p>
-                    ) : null}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className={"flex justify-between"}>
-              <Button
-                aria-label={"Go to previous step"}
-                disabled={currentStep === 0}
-                onClick={handlePreviousStep}
-                size={"icon"}
-                type={"button"}
-                variant={"outline"}
-              >
-                <ChevronLeftIcon />
-              </Button>
-              {currentStep === onboardingSteps.length - 2 && (
-                <Button type={"submit"}>
-                  Find my match <ChevronRightIcon className={"ml-2 h-5 w-5"} />
-                </Button>
+                </>
               )}
-              {currentStep < onboardingSteps.length - 2 && (
+              {/* Match results step */}
+              {currentStep === 3 && (
+                <div
+                  className={
+                    "col-span-1 flex flex-col justify-center items-center py-5 md:col-span-2"
+                  }
+                >
+                  {form.formState.isSubmitting ? (
+                    <div>Loading...</div>
+                  ) : (
+                    <div>
+                      {message && (
+                        <p className={"text-center max-w-md"}>{message}</p>
+                      )}
+
+                      {match?.match_scholarships &&
+                      match.match_scholarships.length > 0 ? (
+                        <div>
+                          <h2
+                            className={"text-center text-xl font-medium mb-4"}
+                          >
+                            Top results
+                          </h2>
+                          <ul className={"space-y-3"}>
+                            {match.match_scholarships.map((scholarship) => (
+                              <li key={scholarship.id}>
+                                <ScholarshipCard scholarship={scholarship} />
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : match?.match_scholarships.length === 0 ? (
+                        <p className={"text-center max-w-md md:mx-auto"}>
+                          Sorry, we couldn&#39;t find any scholarships that
+                          match your profile at the moment.
+                        </p>
+                      ) : null}
+                    </div>
+                  )}
+                </div>
+              )}
+              {/* Onboarding form navigation */}
+              <div
+                className={"col-span-1 flex justify-between mt-5 md:col-span-2"}
+              >
                 <Button
-                  aria-label={"Go to next step"}
-                  onClick={handleNextStep}
+                  aria-label={"Go to previous step"}
+                  disabled={currentStep === 0}
+                  onClick={handlePreviousStep}
                   size={"icon"}
                   type={"button"}
                   variant={"outline"}
                 >
-                  <ChevronRightIcon />
+                  <ChevronLeftIcon />
                 </Button>
-              )}
-            </div>
-          </div>
-        </form>
-      </Form>
-    </>
+                {currentStep === onboardingSteps.length - 2 && (
+                  <Button
+                    disabled={form.formState.isSubmitting}
+                    type={"submit"}
+                  >
+                    Find my match{" "}
+                    <ChevronRightIcon className={"ml-2 h-5 w-5"} />
+                  </Button>
+                )}
+                {currentStep < onboardingSteps.length - 2 && (
+                  <Button
+                    aria-label={"Go to next step"}
+                    onClick={handleNextStep}
+                    size={"icon"}
+                    type={"button"}
+                    variant={"outline"}
+                  >
+                    <ChevronRightIcon />
+                  </Button>
+                )}
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+      <section className={"max-w-md mx-auto"}>
+        {match?.match_scholarships && !match.match_feedback.length ? (
+          <>
+            <p className={"text-sm text-center mb-3"}>
+              <span className={"font-semibold"}>Help us improve!</span> We&#39;d
+              love your thoughts on your scholarship matches. Click the button
+              below to share your feedback.
+            </p>
+            <MatchFeedback matchResultId={match.id} />
+          </>
+        ) : match?.match_scholarships ? (
+          <p className={"text-sm text-center"}>
+            Your feedback has been submitted successfully. Thank you for helping
+            us improve!
+          </p>
+        ) : null}
+      </section>
+    </div>
   );
 }
+
+export { Onboarding };
