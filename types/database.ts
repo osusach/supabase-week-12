@@ -185,6 +185,44 @@ export type Database = {
           },
         ];
       };
+      match_feedback: {
+        Row: {
+          contact_permission: boolean;
+          created_at: string;
+          id: number;
+          improvement_notes: string | null;
+          match_relevance_rating: number;
+          match_result_id: number;
+          updated_at: string | null;
+        };
+        Insert: {
+          contact_permission: boolean;
+          created_at?: string;
+          id?: number;
+          improvement_notes?: string | null;
+          match_relevance_rating: number;
+          match_result_id: number;
+          updated_at?: string | null;
+        };
+        Update: {
+          contact_permission?: boolean;
+          created_at?: string;
+          id?: number;
+          improvement_notes?: string | null;
+          match_relevance_rating?: number;
+          match_result_id?: number;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "match_feedback_match_result_id_fkey";
+            columns: ["match_result_id"];
+            isOneToOne: false;
+            referencedRelation: "match_results";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       match_results: {
         Row: {
           created_at: string;
