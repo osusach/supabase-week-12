@@ -2,6 +2,7 @@ import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
 
 import { Toaster } from "@/components/ui/toaster";
+import { cn } from "@/lib/utils";
 
 import "@/app/globals.css";
 
@@ -25,9 +26,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang={"en"}>
-      <body className={`${GeistSans.className} antialiased`}>
-        {children}
+    <html className={"h-full"} lang={"es"}>
+      <body
+        className={cn(
+          "relative h-full font-sans antialiased",
+          GeistSans.className,
+        )}
+      >
+        <main className={"relative flex flex-col min-h-screen"}>
+          <div className={"flex-grow flex-1"}>{children}</div>
+        </main>
         <Toaster />
       </body>
     </html>
