@@ -77,7 +77,7 @@ function MatchFeedback({ matchResultId }: MatchFeedbackProps) {
   return (
     <Dialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
       <DialogTrigger asChild>
-        <Button className={"block mx-auto"} size={"sm"} variant={"secondary"}>
+        <Button className={"block mx-auto"} size={"sm"} variant={"outline"}>
           Share feedback
         </Button>
       </DialogTrigger>

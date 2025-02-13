@@ -13,7 +13,7 @@ export default async function GetStartedPage() {
   const { matchResult, onboardingProfile } = await fetchOnboardingMatch();
 
   return (
-    <div>
+    <div className={"h-full min-h-screen py-20 px-2.5 bg-gray-100 md:px-0"}>
       <Onboarding
         formOptions={{
           cities,
