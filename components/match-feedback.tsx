@@ -61,14 +61,14 @@ function MatchFeedback({ matchResultId }: MatchFeedbackProps) {
     if (response.success) {
       toast({
         description:
-          "Your feedback has been submitted successfully. Thank you for helping us improve!",
+          "Tu comentario se ha enviado con éxito. ¡Gracias por ayudarnos a mejorar!",
       });
       form.reset();
       setIsDialogOpen(false);
     } else {
       toast({
         description:
-          "Something went wrong while submitting your feedback. Please try again.",
+          "Algo salió mal al enviar tu comentario. Por favor, inténtalo de nuevo.",
         variant: "destructive",
       });
     }
@@ -78,15 +78,15 @@ function MatchFeedback({ matchResultId }: MatchFeedbackProps) {
     <Dialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
       <DialogTrigger asChild>
         <Button className={"block mx-auto"} size={"sm"} variant={"outline"}>
-          Share feedback
+          Enviar comentarios
         </Button>
       </DialogTrigger>
       <DialogContent className={"max-w-lg"}>
         <DialogHeader>
-          <DialogTitle>What did you think of your recommendations?</DialogTitle>
+          <DialogTitle>¿Qué opinas de tus recomendaciones?</DialogTitle>
           <DialogDescription>
-            Your feedback helps us find better scholarships for you and improve
-            our service.
+            Tu opinión nos ayuda a encontrar mejores becas para ti y a mejorar
+            nuestro servicio.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -100,12 +100,14 @@ function MatchFeedback({ matchResultId }: MatchFeedbackProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    How relevant were the scholarship matches?
+                    ¿Qué tan relevantes fueron las becas recomendadas?
                   </FormLabel>
                   <Select onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder={"Select a rating"} />
+                        <SelectValue
+                          placeholder={"Seleccione una calificación"}
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -117,7 +119,8 @@ function MatchFeedback({ matchResultId }: MatchFeedbackProps) {
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    Choose a rating from 1 (not relevant) to 5 (very relevant)
+                    Elige una calificación del 1 (poco relevante) al 5 (muy
+                    relevante).
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -129,8 +132,8 @@ function MatchFeedback({ matchResultId }: MatchFeedbackProps) {
               render={({ field }) => (
                 <FormItem className="space-y-3">
                   <FormLabel>
-                    Would you like to be contacted in the future about updates
-                    and improvements to the scholarship recommendations?
+                    ¿Te gustaría ser contactado en el futuro sobre
+                    actualizaciones y mejoras en las recomendaciones de becas?
                   </FormLabel>
                   <FormControl>
                     <RadioGroup
@@ -143,7 +146,7 @@ function MatchFeedback({ matchResultId }: MatchFeedbackProps) {
                         <FormControl>
                           <RadioGroupItem value={"yes"} />
                         </FormControl>
-                        <FormLabel className={"font-normal"}>Yes</FormLabel>
+                        <FormLabel className={"font-normal"}>Sí</FormLabel>
                       </FormItem>
                       <FormItem
                         className={"flex items-center space-x-3 space-y-0"}
@@ -164,11 +167,11 @@ function MatchFeedback({ matchResultId }: MatchFeedbackProps) {
               name={"improvementNotes"}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Any suggestions or comments?</FormLabel>
+                  <FormLabel>¿Tienes alguna sugerencia o comentario?</FormLabel>
                   <FormControl>
                     <Textarea
                       className={"min-h-[90px] resize-none"}
-                      placeholder={"Tell us how we can improve"}
+                      placeholder={"Cuéntanos cómo podemos mejorar"}
                       {...field}
                     />
                   </FormControl>
@@ -179,11 +182,11 @@ function MatchFeedback({ matchResultId }: MatchFeedbackProps) {
             <DialogFooter>
               <DialogClose asChild>
                 <Button type={"button"} variant={"secondary"}>
-                  Cancel
+                  Cancelar
                 </Button>
               </DialogClose>
               <Button disabled={form.formState.isSubmitting} type={"submit"}>
-                Submit
+                Enviar
               </Button>
             </DialogFooter>
           </form>

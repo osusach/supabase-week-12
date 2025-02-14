@@ -90,7 +90,7 @@ const onboardingSteps = [
       "basicInformation.stateId",
     ],
     icon: UserIcon,
-    label: "Basic Information",
+    label: "Datos personales",
   },
   {
     fields: [
@@ -101,12 +101,12 @@ const onboardingSteps = [
       "academicBackground.intendedFieldOfStudyId",
     ],
     icon: GraduationCapIcon,
-    label: "Academic Background",
+    label: "Antecedentes académicos",
   },
   {
     fields: ["extracurricularsIds", "additionalNotes"],
     icon: RocketIcon,
-    label: "Career & Personal Interests",
+    label: "Carrera e intereses personales",
   },
   { icon: PuzzleIcon, label: "Match" },
 ];
@@ -233,11 +233,11 @@ function Onboarding({
     <div>
       <Card className={"w-full max-w-2xl mx-auto mb-5"}>
         <CardHeader>
-          <CardTitle>Find your perfect scholarship match</CardTitle>
+          <CardTitle>Encuentra la beca perfecta para ti.</CardTitle>
           <CardDescription>
-            Tell us a little about yourself! Your responses will help us match
-            you with scholarships that align with your background and interests.
-            Fields marked with an asterisk (*) are required.
+            Cuéntanos un poco sobre ti! Tus respuestas nos ayudarán a conectarte
+            con becas que se alineen con tu trayectoria e intereses. Los campos
+            marcados con un asterisco (*) son obligatorios.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -260,7 +260,7 @@ function Onboarding({
                   >
                     <step.icon
                       className={cn(
-                        "h-8 w-8 text-muted-foreground",
+                        "h-7 w-7 text-muted-foreground",
                         idx <= currentStep && "text-blue-500",
                       )}
                     />
@@ -287,7 +287,7 @@ function Onboarding({
                     render={({ field }) => (
                       <FormItem className={"col-span-1 space-y-2"}>
                         <FormLabel>
-                          First name<span aria-hidden={true}>*</span>
+                          Nombre<span aria-hidden={true}>*</span>
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -307,7 +307,7 @@ function Onboarding({
                     render={({ field }) => (
                       <FormItem className={"col-span-1 space-y-2"}>
                         <FormLabel>
-                          Last name<span aria-hidden={true}>*</span>
+                          Apellido(s)<span aria-hidden={true}>*</span>
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -327,7 +327,7 @@ function Onboarding({
                     render={({ field }) => (
                       <FormItem className={"col-span-1 space-y-2"}>
                         <FormLabel>
-                          State<span aria-hidden={true}>*</span>
+                          Región<span aria-hidden={true}>*</span>
                         </FormLabel>
                         <Select
                           defaultValue={field.value?.toString()}
@@ -339,7 +339,7 @@ function Onboarding({
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue
-                                placeholder={"Please select a state"}
+                                placeholder={"Seleccione una región"}
                               />
                             </SelectTrigger>
                           </FormControl>
@@ -366,7 +366,7 @@ function Onboarding({
                     render={({ field }) => (
                       <FormItem className={"col-span-1 space-y-2"}>
                         <FormLabel>
-                          City<span aria-hidden={true}>*</span>
+                          Comuna<span aria-hidden={true}>*</span>
                         </FormLabel>
                         <Select
                           defaultValue={field.value?.toString()}
@@ -378,7 +378,7 @@ function Onboarding({
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue
-                                placeholder={"Please select a city"}
+                                placeholder={"Seleccione una comuna"}
                               />
                             </SelectTrigger>
                           </FormControl>
@@ -407,7 +407,7 @@ function Onboarding({
                     render={({ field }) => (
                       <FormItem className={"col-span-1 space-y-2"}>
                         <FormLabel>
-                          Date of birth<span aria-hidden={true}>*</span>
+                          Fecha de nacimiento<span aria-hidden={true}>*</span>
                         </FormLabel>
                         <Popover>
                           <PopoverTrigger
@@ -427,7 +427,7 @@ function Onboarding({
                                 {field.value ? (
                                   format(field.value, "PPP")
                                 ) : (
-                                  <span>Pick a date</span>
+                                  <span>Seleccione una fecha</span>
                                 )}
                                 <CalendarIcon
                                   className={"ml-auto h-4 w-4 opacity-50"}
@@ -447,7 +447,7 @@ function Onboarding({
                                 onValueChange={handleMonthChange}
                               >
                                 <SelectTrigger className={"w-[110px]"}>
-                                  <SelectValue placeholder={"Month"} />
+                                  <SelectValue placeholder={"Mes"} />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {months.map((month) => (
@@ -462,7 +462,7 @@ function Onboarding({
                                 onValueChange={handleYearChange}
                               >
                                 <SelectTrigger className={"w-[110px]"}>
-                                  <SelectValue placeholder={"Year"} />
+                                  <SelectValue placeholder={"Año"} />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {birthYears.map((option) => (
@@ -499,7 +499,7 @@ function Onboarding({
                     name={"basicInformation.gender"}
                     render={({ field }) => (
                       <FormItem className={"col-span-1 space-y-2"}>
-                        <FormLabel>Gender</FormLabel>
+                        <FormLabel>Género</FormLabel>
                         <Select
                           defaultValue={field.value}
                           disabled={
@@ -510,7 +510,7 @@ function Onboarding({
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue
-                                placeholder={"Please select a gender"}
+                                placeholder={"Seleccione un género"}
                               />
                             </SelectTrigger>
                           </FormControl>
@@ -540,7 +540,7 @@ function Onboarding({
                     render={({ field }) => (
                       <FormItem className={"col-span-1 space-y-2"}>
                         <FormLabel>
-                          Current Academic Level
+                          Nivel educativo
                           <span aria-hidden={true}>*</span>
                         </FormLabel>
                         <Select
@@ -553,7 +553,7 @@ function Onboarding({
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue
-                                placeholder={"Please select an academic level"}
+                                placeholder={"Seleccione un nivel educativo"}
                               />
                             </SelectTrigger>
                           </FormControl>
@@ -578,7 +578,7 @@ function Onboarding({
                     render={({ field }) => (
                       <FormItem className={"col-span-1 space-y-2"}>
                         <FormLabel>
-                          Current or Most Recent School/Institution
+                          Actual o última institución educativa
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -597,7 +597,7 @@ function Onboarding({
                     name={"academicBackground.graduationYear"}
                     render={({ field }) => (
                       <FormItem className={"col-span-1 space-y-2"}>
-                        <FormLabel>Graduation Year</FormLabel>
+                        <FormLabel>Año de graduación</FormLabel>
                         <Select
                           defaultValue={field.value?.toString()}
                           disabled={
@@ -608,7 +608,7 @@ function Onboarding({
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue
-                                placeholder={"Please select a graduation year"}
+                                placeholder={"Seleccione un año de graduación"}
                               />
                             </SelectTrigger>
                           </FormControl>
@@ -632,7 +632,7 @@ function Onboarding({
                       name={"academicBackground.intendedFieldOfStudyId"}
                       render={({ field }) => (
                         <FormItem className={"col-span-1 space-y-2"}>
-                          <FormLabel>Intended Field of Study</FormLabel>
+                          <FormLabel>Carrera de interés</FormLabel>
                           <Select
                             defaultValue={field.value?.toString()}
                             disabled={
@@ -643,7 +643,7 @@ function Onboarding({
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue
-                                  placeholder={"Please select a field of study"}
+                                  placeholder={"Seleccione una carrera"}
                                 />
                               </SelectTrigger>
                             </FormControl>
@@ -668,7 +668,7 @@ function Onboarding({
                       name={"academicBackground.fieldOfStudyId"}
                       render={({ field }) => (
                         <FormItem className={"col-span-1 space-y-2"}>
-                          <FormLabel>Field of Study</FormLabel>
+                          <FormLabel>Carrera actual</FormLabel>
                           <Select
                             defaultValue={field.value?.toString()}
                             disabled={
@@ -679,7 +679,7 @@ function Onboarding({
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue
-                                  placeholder={"Please select a field of study"}
+                                  placeholder={"Seleccione una carrera"}
                                 />
                               </SelectTrigger>
                             </FormControl>
@@ -711,10 +711,9 @@ function Onboarding({
                         className={"col-span-1 space-y-2 md:col-span-2"}
                       >
                         <div>
-                          <FormLabel>Extracurricular Activities</FormLabel>
+                          <FormLabel>Actividades extracurriculares</FormLabel>
                           <FormDescription>
-                            What activities do you enjoy participating in
-                            outside of school?
+                            En qué actividades participas fuera de clases?
                           </FormDescription>
                         </div>
                         {formOptions.extracurricularActivities.map(
@@ -772,23 +771,21 @@ function Onboarding({
                       <FormItem
                         className={"col-span-1 space-y-2 md:col-span-2"}
                       >
-                        <FormLabel>
-                          Is there anything else you would like to share about
-                          your interests or career goals?
-                        </FormLabel>
+                        <FormLabel>Datos adicionales</FormLabel>
                         <FormControl>
                           <Textarea
                             className={"min-h-[90px] resize-none"}
                             disabled={
                               !!onboardingProfile || form.formState.isSubmitting
                             }
-                            placeholder={"Tell us a little bit about yourself"}
+                            placeholder={"Cuéntanos sobre ti"}
                             {...field}
                           />
                         </FormControl>
                         <FormDescription>
-                          Feel free to describe your goals, interests, or
-                          anything you think is important for us to know.
+                          Puedes usar este espacio para describir tus metas,
+                          intereses o cualquier cosa que consideres importante
+                          que sepamos.
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -817,7 +814,7 @@ function Onboarding({
                           <h2
                             className={"text-center text-xl font-medium mb-4"}
                           >
-                            Top results
+                            Mejores resultados
                           </h2>
                           <ul className={"space-y-3"}>
                             {match.match_scholarships.map((scholarship) => (
@@ -829,8 +826,8 @@ function Onboarding({
                         </div>
                       ) : match?.match_scholarships.length === 0 ? (
                         <p className={"text-center max-w-md md:mx-auto"}>
-                          Sorry, we couldn&#39;t find any scholarships that
-                          match your profile at the moment.
+                          Lo sentimos, no encontramos becas que coincidan con tu
+                          perfil en este momento
                         </p>
                       ) : null}
                     </div>
@@ -856,7 +853,7 @@ function Onboarding({
                     disabled={form.formState.isSubmitting}
                     type={"submit"}
                   >
-                    Find my match{" "}
+                    Ver resultados{" "}
                     <ChevronRightIcon className={"ml-2 h-5 w-5"} />
                   </Button>
                 )}
@@ -880,16 +877,16 @@ function Onboarding({
         {match?.match_scholarships && !match.match_feedback.length ? (
           <>
             <p className={"text-sm text-center mb-3"}>
-              <span className={"font-semibold"}>Help us improve!</span> We&#39;d
-              love your thoughts on your scholarship matches. Click the button
-              below to share your feedback.
+              <span className={"font-semibold"}>¡Ayúdanos a mejorar!</span> Nos
+              encantaría conocer tu opinión sobre tus becas recomendadas. Haz
+              clic en el botón de abajo para compartir tus comentarios.
             </p>
             <MatchFeedback matchResultId={match.id} />
           </>
         ) : match?.match_scholarships ? (
           <p className={"text-sm text-center"}>
-            Your feedback has been submitted successfully. Thank you for helping
-            us improve!
+            Tu comentario se ha enviado con éxito. ¡Gracias por ayudarnos a
+            mejorar!
           </p>
         ) : null}
       </section>
