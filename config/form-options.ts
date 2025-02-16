@@ -4,16 +4,16 @@ export const birthYears = Array.from({ length: 100 }, (_, i) => {
 });
 
 export const educationLevels = [
-  { label: "High School", value: "high_school" },
-  { label: "Undergraduate", value: "undergraduate" },
-  { label: "Other", value: "other" },
+  { label: " Enseñanza Media", value: "high_school" },
+  { label: "Pregrado", value: "undergraduate" },
+  { label: "Postgrado", value: "other" },
 ];
 
 export const genders = [
-  { label: "Male", value: "male" },
-  { label: "Female", value: "female" },
-  { label: "Non-binary", value: "non_binary" },
-  { label: "Prefer not to say", value: "prefer_not_to_say" },
+  { label: "Masculino", value: "male" },
+  { label: "Femenino", value: "female" },
+  { label: "No binario", value: "non_binary" },
+  { label: "Prefiero no decir", value: "prefer_not_to_say" },
 ];
 
 export const graduationYears = Array.from({ length: 15 }, (_, i) => {
@@ -22,16 +22,16 @@ export const graduationYears = Array.from({ length: 15 }, (_, i) => {
 });
 
 export const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
+  "Enero",
+  "Febrero",
+  "Marzo",
+  "Abril",
+  "Mayo",
+  "Junio",
+  "Julio",
+  "Agosto",
+  "Septiembre",
+  "Octubre",
+  "Noviembre",
+  "Diciembre",
 ];

@@ -3,63 +3,69 @@ import { z } from "zod";
 export const onboardingSchema = z.object({
   academicBackground: z.object({
     educationLevel: z.enum(["high_school", "other", "undergraduate"], {
-      invalid_type_error: "Education level is not valid",
-      required_error: "Education level is required",
+      invalid_type_error: "Por favor, indica un nivel educativo válido",
+      required_error: "El nivel educativo es obligatorio",
     }),
     lastAttendedInstitution: z
       .string()
       .trim()
       .min(1, {
         message:
-          "Current or last institution must be 1 or more characters long",
+          "La institución actual o última debe tener al menos 1 carácter",
       })
       .max(50, {
         message:
-          "Current or last institution must be 50 or fewer characters long",
+          "La institución actual o última debe tener 300 caracteres o menos",
       })
       .optional()
       .or(z.literal("")),
     fieldOfStudyId: z.coerce
-      .number({ invalid_type_error: "Field of study is not valid" })
+      .number({
+        invalid_type_error: "Por favor, indica una carrera válida",
+      })
       .optional(),
     graduationYear: z.coerce
-      .number({ invalid_type_error: "Graduation year is not valid" })
+      .number({
+        invalid_type_error: "Por favor, indica un año de graduación válido",
+      })
       .optional(),
     intendedFieldOfStudyId: z.coerce
-      .number({ invalid_type_error: "Intended field of study is not valid" })
+      .number({
+        invalid_type_error: "Por favor, indica una carrera válida",
+      })
       .optional(),
   }),
   basicInformation: z.object({
     cityId: z.coerce.number({
-      invalid_type_error: "City is not valid",
-      required_error: "City is required",
+      invalid_type_error: "Por favor, indica una comuna válida",
+      required_error: "La comuna es obligatoria",
     }),
     countryId: z.coerce.number({
-      invalid_type_error: "Country is not valid",
-      required_error: "Country is required",
+      invalid_type_error: "Por favor, indica un país válido",
+      required_error: "El país es obligatorio",
     }),
-    dateOfBirth: z.coerce.date({
-      invalid_type_error: "Date of birth is not valid",
-      required_error: "Date of birth is required",
+    dateOfBirth: z.date({
+      invalid_type_error: "Por favor, indica una fecha de nacimiento válida",
+      required_error: "La fecha de nacimiento es obligatoria",
     }),
     firstName: z
       .string()
       .trim()
-      .min(1, { message: "First name must be 1 or more characters long" })
-      .max(50, { message: "First name must be 50 or fewer characters long" }),
+      .min(1, { message: "El nombre debe tener al menos 1 carácter" })
+      .max(50, { message: "El nombre debe tener 50 caracteres o menos" }),
     gender: z
       .enum(["female", "male", "non_binary", "prefer_not_to_say"], {
-        invalid_type_error: "Gender is not valid",
+        invalid_type_error: "Por favor, indica un género válido",
       })
       .optional(),
     lastName: z
       .string()
       .trim()
-      .min(1, { message: "Last name must be 1 or more characters long" })
-      .max(50, { message: "Last name must be 50 or fewer characters long" }),
+      .min(1, { message: "El apellido debe tener al menos 1 carácter" })
+      .max(50, { message: "El apellido debe tener 50 caracteres o menos" }),
     stateId: z.coerce.number({
-      invalid_type_error: "State is not valid",
-      required_error: "State is required",
+      invalid_type_error: "Por favor, indica una región válida",
+      required_error: "La región es obligatoria",
     }),
   }),
   personalInterests: z.object({
@@ -67,9 +73,11 @@ export const onboardingSchema = z.object({
     additionalNotes: z
       .string()
       .trim()
-      .min(1, { message: "Additional notes must be 1 or more characters long" })
+      .min(1, {
+        message: "Los datos adicionales deben tener al menos 1 carácter",
+      })
       .max(500, {
-        message: "Additional notes must be 500 or fewer characters long",
+        message: "Los datos adicionales deben tener 50 caracteres o menos",
       })
       .optional()
       .or(z.literal("")),

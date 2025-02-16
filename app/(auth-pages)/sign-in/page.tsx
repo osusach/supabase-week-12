@@ -1,39 +1,38 @@
 "use client";
 
-import Link from "next/link";
+import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import { signInWithGoogle } from "@/actions/auth";
 
 export default function Login() {
+  const handleSignIn = async () => {
+    await signInWithGoogle();
+  };
+
   return (
-    <div className={"flex justify-center items-center min-h-screen p-5"}>
+    <>
       <div
         className={
-          "flex flex-col items-center gap-4 max-w-md border border-gray-300 rounded-lg p-5 lg:p-10 text-center"
+          "container relative pt-20 flex flex-col justify-center items-center lg:px-0"
         }
       >
-        <h1 className={"text-2xl font-semibold lg:text-3xl"}>Sign in</h1>
-        <p>Continue with</p>
-        <Button
-          onClick={async () => {
-            await signInWithGoogle();
-          }}
-        >
-          Google
-        </Button>
-        <p className={"text-sm"}>
-          By continuing, you agree to our{" "}
-          <Link className={"underline underline-offset-4"} href={"/legal"}>
-            Terms of Service
-          </Link>{" "}
-          and confirm that you have read our{" "}
-          <Link className={"underline underline-offset-4"} href={"/privacy"}>
-            Privacy Policy
-          </Link>
-          .
-        </p>
+        <div className={"mx-auto flex flex-col w-full space-y-6 sm:w-[350px]"}>
+          <div className={"flex flex-col items-center space-y-2 text-center"}>
+            <Image
+              alt={"ChileBecas logo"}
+              height={100}
+              src={"/logo.svg"}
+              width={100}
+            />
+            <h1 className={"text-2xl font-semibold tracking-tight"}>
+              Iniciar sesión
+            </h1>
+          </div>
+          <p className={"text-center text-muted-foreground"}>Continúa con</p>
+          <Button onClick={handleSignIn}>Google</Button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

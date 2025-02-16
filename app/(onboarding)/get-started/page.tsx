@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { Onboarding } from "@/components/onboarding";
+import { SignOutButton } from "@/components/buttons";
 import { fetchFormOptions, fetchOnboardingMatch } from "@/lib/data";
 
 export const metadata: Metadata = {
@@ -13,7 +14,14 @@ export default async function GetStartedPage() {
   const { matchResult, onboardingProfile } = await fetchOnboardingMatch();
 
   return (
-    <div>
+    <div className={"h-full min-h-screen py-20 px-2.5 bg-gray-100 md:px-0"}>
+      <section
+        className={
+          "w-full max-w-2xl mx-auto flex flex-row justify-center md:justify-end mb-2.5"
+        }
+      >
+        <SignOutButton />
+      </section>
       <Onboarding
         formOptions={{
           cities,
