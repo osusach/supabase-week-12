@@ -1,13 +1,19 @@
 "use client";
 
 import Image from "next/image";
+import { use } from "react";
 
 import { Button } from "@/components/ui/button";
 import { signInWithGoogle } from "@/actions/auth";
 
-export default function Login() {
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
+
+export default function SignInPage(props: { searchParams: SearchParams }) {
+  const searchParams = use(props.searchParams);
+  const redirect = searchParams.redirect as string | undefined;
+
   const handleSignIn = async () => {
-    await signInWithGoogle();
+    await signInWithGoogle({ nextUrl: redirect });
   };
 
   return (

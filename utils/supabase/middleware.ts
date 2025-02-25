@@ -40,7 +40,9 @@ export const updateSession = async (request: NextRequest) => {
     );
 
     if (isProtectedRoute && user.error) {
-      return NextResponse.redirect(new URL("/sign-in", request.url));
+      const redirectUrl = new URL("/sign-in", request.url);
+      redirectUrl.searchParams.set("redirect", request.nextUrl.pathname);
+      return NextResponse.redirect(redirectUrl);
     }
 
     if (request.nextUrl.pathname === "/" && !user.error) {

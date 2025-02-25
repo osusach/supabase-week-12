@@ -5,10 +5,20 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/utils/supabase/server";
 
-export async function signInWithGoogle() {
+export async function signInWithGoogle({ nextUrl }: { nextUrl?: string } = {}) {
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
-  const redirectTo = `${origin}/auth/callback`;
+
+  // Redirect config
+  const baseUrl = `${origin}/auth/callback`;
+  const searchParams = new URLSearchParams();
+
+  if (nextUrl) {
+    searchParams.append("next_url", nextUrl);
+  }
+
+  const queryString = searchParams.toString();
+  const redirectTo = queryString ? `${baseUrl}?${queryString}` : baseUrl;
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     options: {
