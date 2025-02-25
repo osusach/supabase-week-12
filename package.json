@@ -6,6 +6,7 @@
     "dev": "next dev --turbo",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
+    "generate:types": "supabase gen types typescript --local > ./types/database.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
