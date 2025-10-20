@@ -5,8 +5,8 @@ on:
   workflow_dispatch:
 
 env:
-  SUPABASE_AUTH_GOOGLE_CLIENT_ID: " "
-  SUPABASE_AUTH_GOOGLE_SECRET: " "
+  GOOGLE_AUTH_CLIENT_ID: " "
+  GOOGLE_AUTH_CLIENT_SECRET: " "
 
 jobs:
   test:
