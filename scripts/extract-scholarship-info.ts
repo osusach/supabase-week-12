@@ -13,16 +13,13 @@ dotenv.config({ path: path.join(process.cwd(), ".env.local") });
 
 // Environment variables
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
+const SUPABASE_URL = process.env.SUPABASE_URL;
 
-if (!OPENAI_API_KEY || !SUPABASE_SERVICE_ROLE_KEY || !SUPABASE_URL) {
+if (!OPENAI_API_KEY || !SUPABASE_SECRET_KEY || !SUPABASE_URL) {
   console.error("Missing required environment variables:");
   console.error("- OPENAI_API_KEY:", OPENAI_API_KEY ? "✓" : "✗");
-  console.error(
-    "- SUPABASE_SERVICE_ROLE_KEY:",
-    SUPABASE_SERVICE_ROLE_KEY ? "✓" : "✗",
-  );
+  console.error("- SUPABASE_SECRET_KEY:", SUPABASE_SECRET_KEY ? "✓" : "✗");
   console.error("- SUPABASE_URL:", SUPABASE_URL ? "✓" : "✗");
   process.exit(1);
 }
@@ -42,7 +39,7 @@ const embeddings = new OpenAIEmbeddings({
   model: "text-embedding-3-small",
 });
 
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY);
 
 export const vectorStore = new SupabaseVectorStore(embeddings, {
   client: supabaseClient,
