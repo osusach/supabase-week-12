@@ -1,6 +1,6 @@
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import { ChatOpenAI } from "@langchain/openai";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { PromptTemplate } from "@langchain/core/prompts";
 import {
   RunnablePassthrough,
@@ -9,12 +9,11 @@ import {
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { createUIMessageStreamResponse, type UIMessage } from "ai";
 import { toUIMessageStream } from "@ai-sdk/langchain";
+import type { Document } from "@langchain/core/documents";
 
-import { vectorStore } from "@/utils/supabase/vector-store";
+import { selfQueryRetriever } from "@/utils/supabase/vector-store";
 
 const model = new ChatOpenAI({ model: "gpt-4o-mini", temperature: 0 });
-
-const retriever = vectorStore.asRetriever();
 
 export async function POST(req: NextRequest) {
   const {
@@ -75,8 +74,10 @@ export async function POST(req: NextRequest) {
     .pipe(new StringOutputParser());
   const retrieverChain = RunnableSequence.from([
     (input) => input.standalone_question,
-    retriever,
-    (input) => ({ context: input.join("\n\n") }),
+    selfQueryRetriever,
+    (input) => ({
+      context: input.map((doc: Document) => JSON.stringify(doc)).join("\n\n"),
+    }),
   ]);
   const answerChain = answerPrompt.pipe(model).pipe(new StringOutputParser());
   const chain = RunnableSequence.from([
