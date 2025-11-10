@@ -12,11 +12,11 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   description:
-    "PathwayAid helps students find personalized scholarships and financial aid opportunities based on their academic interests and background. Easily browse a vast directory of scholarships or get matched with opportunities tailored to you. Start your journey towards a debt-free education today!",
+    "Explora becas para estudiantes en un solo lugar. Busca, filtra y descubre oportunidades según tu perfil con ChileBecas.",
   metadataBase: new URL(defaultUrl),
   title: {
-    default: "PathwayAid — Find Scholarships and Financial Aid for College",
-    template: "%s | PathwayAid",
+    default: "ChileBecas: Encuentra becas en Chile fácilmente",
+    template: "%s | ChileBecas",
   },
 };
 
