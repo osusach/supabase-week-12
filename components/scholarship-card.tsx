@@ -30,9 +30,9 @@ export default function ScholarshipCard({ scholarship }: ScholarshipCardProps) {
         </h3>{" "}
         <SquareArrowOutUpRightIcon className={"ml-2 h-4 w-3"} />
       </a>
-      <p className={cn("mb-1", truncateText && "line-clamp-3")}>
+      {/* <p className={cn("mb-1", truncateText && "line-clamp-3")}>
         {scholarship.content}
-      </p>
+      </p> */}
       <Button
         className={"p-0 h-fit"}
         onClick={handleButtonClick}

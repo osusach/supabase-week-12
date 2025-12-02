@@ -128,8 +128,8 @@ export function ChatWindow() {
           {error && (
             <div className={"text-center py-4"}>
               <p className={"text-sm text-destructive mb-3"}>
-                Lo sentimos, ha ocurrido un error. Por favor, inténtalo de
-                nuevo más tarde.
+                Lo sentimos, ha ocurrido un error. Por favor, inténtalo de nuevo
+                más tarde.
               </p>
               <Button
                 onClick={() => regenerate()}
@@ -208,7 +208,8 @@ export function ChatWindow() {
           </form>
 
           <p className={"text-xs text-muted-foreground mt-2 text-center"}>
-            El asistente puede cometer errores. Te recomendamos verificar la información oficial.
+            El asistente puede cometer errores. Te recomendamos verificar la
+            información oficial.
           </p>
         </div>
       </CardContent>

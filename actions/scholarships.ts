@@ -74,7 +74,7 @@ export type MatchResult = {
 
 export type MatchScholarship = Pick<
   Tables<"scholarships">,
-  "id" | "content" | "name" | "url"
+  "id" | "name" | "url"
 >;
 
 type MatchScholarshipsResponse = {
@@ -247,7 +247,6 @@ export async function matchScholarships(
           scholarship_id,
           scholarship:scholarships (
             id,
-            content,
             name,
             url
           )
@@ -282,7 +281,6 @@ export async function matchScholarships(
         id,
         scholarship:scholarships (
           id,
-          content,
           name,
           url
         )
