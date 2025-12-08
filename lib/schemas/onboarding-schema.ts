@@ -3,51 +3,32 @@ import { z } from "zod";
 export const onboardingSchema = z.object({
   academicBackground: z.object({
     educationLevel: z.enum(["high_school", "other", "undergraduate"], {
-      invalid_type_error: "Por favor, indica un nivel educativo válido",
-      required_error: "El nivel educativo es obligatorio",
+      error: "Por favor, indica un nivel educativo válido",
     }),
     lastAttendedInstitution: z
       .string()
       .trim()
-      .min(1, {
-        message:
-          "La institución actual o última debe tener al menos 1 carácter",
-      })
-      .max(50, {
-        message:
-          "La institución actual o última debe tener 300 caracteres o menos",
-      })
+      .min(1, "La institución actual o última debe tener al menos 1 carácter")
+      .max(
+        50,
+        "La institución actual o última debe tener 300 caracteres o menos",
+      )
       .optional()
       .or(z.literal("")),
     fieldOfStudyId: z.coerce
-      .number({
-        invalid_type_error: "Por favor, indica una carrera válida",
-      })
+      .number("Por favor, indica una carrera válida")
       .optional(),
     graduationYear: z.coerce
-      .number({
-        invalid_type_error: "Por favor, indica un año de graduación válido",
-      })
+      .number("Por favor, indica un año de graduación válido")
       .optional(),
     intendedFieldOfStudyId: z.coerce
-      .number({
-        invalid_type_error: "Por favor, indica una carrera válida",
-      })
+      .number("Por favor, indica una carrera válida")
       .optional(),
   }),
   basicInformation: z.object({
-    cityId: z.coerce.number({
-      invalid_type_error: "Por favor, indica una comuna válida",
-      required_error: "La comuna es obligatoria",
-    }),
-    countryId: z.coerce.number({
-      invalid_type_error: "Por favor, indica un país válido",
-      required_error: "El país es obligatorio",
-    }),
-    dateOfBirth: z.date({
-      invalid_type_error: "Por favor, indica una fecha de nacimiento válida",
-      required_error: "La fecha de nacimiento es obligatoria",
-    }),
+    cityId: z.coerce.number("Por favor, indica una comuna válida"),
+    countryId: z.coerce.number("Por favor, indica un país válido"),
+    dateOfBirth: z.date("Por favor, indica una fecha de nacimiento válida"),
     firstName: z
       .string()
       .trim()
@@ -55,7 +36,7 @@ export const onboardingSchema = z.object({
       .max(50, { message: "El nombre debe tener 50 caracteres o menos" }),
     gender: z
       .enum(["female", "male", "non_binary", "prefer_not_to_say"], {
-        invalid_type_error: "Por favor, indica un género válido",
+        error: "Por favor, indica un género válido",
       })
       .optional(),
     lastName: z
@@ -63,10 +44,7 @@ export const onboardingSchema = z.object({
       .trim()
       .min(1, { message: "El apellido debe tener al menos 1 carácter" })
       .max(50, { message: "El apellido debe tener 50 caracteres o menos" }),
-    stateId: z.coerce.number({
-      invalid_type_error: "Por favor, indica una región válida",
-      required_error: "La región es obligatoria",
-    }),
+    stateId: z.coerce.number("Por favor, indica una región válida"),
   }),
   personalInterests: z.object({
     extracurricularsIds: z.array(z.coerce.number()),

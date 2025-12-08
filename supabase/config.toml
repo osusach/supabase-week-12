@@ -197,8 +197,8 @@ skip_nonce_check = false
 
 [auth.external.google]
 enabled = true
-client_id = "env(SUPABASE_AUTH_GOOGLE_CLIENT_ID)"
-secret = "env(SUPABASE_AUTH_GOOGLE_SECRET)"
+client_id = "env(GOOGLE_AUTH_CLIENT_ID)"
+secret = "env(GOOGLE_AUTH_CLIENT_SECRET)"
 redirect_uri = "http://localhost:54321/auth/v1/callback"
 skip_nonce_check = true
 
@@ -227,7 +227,7 @@ policy = "oneshot"
 inspector_port = 8083
 
 [analytics]
-enabled = true
+enabled = false
 port = 54327
 # Configure one of the supported backends: `postgres`, `bigquery`.
 backend = "postgres"

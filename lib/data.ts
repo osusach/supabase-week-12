@@ -196,7 +196,6 @@ export async function fetchOnboardingMatch(): Promise<OnboardingMatch> {
             scholarship_id,
             scholarship:scholarships (
               id,
-              content,
               name,
               url
             )
