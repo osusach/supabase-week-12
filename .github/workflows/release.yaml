@@ -32,6 +32,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Build app
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         run: pnpm build
       - name: Release
         env:
