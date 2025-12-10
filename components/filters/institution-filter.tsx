@@ -1,6 +1,9 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import type { Institution } from "@/lib/queries/institutions";
@@ -9,9 +12,12 @@ interface InstitutionFilterProps {
   institutions: Institution[];
 }
 
+const INITIAL_VISIBLE_COUNT = 5;
+
 export function InstitutionFilter({ institutions }: InstitutionFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [showAll, setShowAll] = useState<boolean>(false);
 
   // Get currently selected institutions from URL
   const selectedInstitutions =
@@ -51,9 +57,14 @@ export function InstitutionFilter({ institutions }: InstitutionFilterProps) {
     );
   }
 
+  const visibleInstitutions = showAll
+    ? institutions
+    : institutions.slice(0, INITIAL_VISIBLE_COUNT);
+  const hasMore = institutions.length > INITIAL_VISIBLE_COUNT;
+
   return (
     <div className={"space-y-3"}>
-      {institutions.map((institution) => {
+      {visibleInstitutions.map((institution) => {
         const institutionIdStr = institution.id.toString();
         const isChecked = selectedInstitutions.includes(institutionIdStr);
 
@@ -67,7 +78,7 @@ export function InstitutionFilter({ institutions }: InstitutionFilterProps) {
               }
             />
             <Label
-              className={"text-sm font-normal cursor-pointer"}
+              className={"text-sm font-normal cursor-pointer flex-1"}
               htmlFor={`institution-${institution.id}`}
             >
               {institution.name}
@@ -75,6 +86,16 @@ export function InstitutionFilter({ institutions }: InstitutionFilterProps) {
           </div>
         );
       })}
+
+      {hasMore && (
+        <Button
+          className={"h-auto p-0 text-sm font-normal"}
+          onClick={() => setShowAll(!showAll)}
+          variant={"link"}
+        >
+          {showAll ? "Ver menos opciones" : "Ver todas las opciones"}
+        </Button>
+      )}
     </div>
   );
 }

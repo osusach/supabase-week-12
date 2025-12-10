@@ -48,7 +48,7 @@ export function BenefitTypeFilter() {
         const isChecked = selectedBenefits.includes(benefit.value);
 
         return (
-          <div key={benefit.value} className={"flex items-center space-x-2"}>
+          <div className={"flex items-center space-x-2"} key={benefit.value}>
             <Checkbox
               checked={isChecked}
               id={`benefit-${benefit.value}`}
@@ -57,7 +57,7 @@ export function BenefitTypeFilter() {
               }
             />
             <Label
-              className={"text-sm font-normal cursor-pointer"}
+              className={"text-sm font-normal cursor-pointer flex-1"}
               htmlFor={`benefit-${benefit.value}`}
             >
               {benefit.label}

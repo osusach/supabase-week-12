@@ -38,7 +38,7 @@ export function DirectoryScholarshipCard({
   return (
     <Card
       className={
-        "flex flex-col h-full hover:shadow-lg transition-shadow duration-200"
+        "flex flex-col h-full shadow-none hover:shadow-md transition-shadow duration-200"
       }
     >
       <CardHeader className={"space-y-3"}>
