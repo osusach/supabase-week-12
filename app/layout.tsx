@@ -1,6 +1,7 @@
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
 
+import { Providers } from "@/app/providers";
 import { Toaster } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
 
@@ -33,10 +34,12 @@ export default function RootLayout({
           GeistSans.className,
         )}
       >
-        <main className={"relative flex flex-col min-h-screen"}>
-          <div className={"flex-grow flex-1"}>{children}</div>
-        </main>
-        <Toaster />
+        <Providers>
+          <main className={"relative flex flex-col min-h-screen"}>
+            <div className={"flex-grow flex-1"}>{children}</div>
+          </main>
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );
