@@ -1,4 +1,11 @@
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { BenefitTypeFilter } from "@/components/filters/benefit-type-filter";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InstitutionFilter } from "@/components/filters/institution-filter";
 import { getInstitutions } from "@/lib/queries/institutions";
 
@@ -7,28 +14,37 @@ export async function ScholarshipFilters() {
   const institutions = await getInstitutions();
 
   return (
-    <div className={"sticky top-4 space-y-4 lg:space-y-0"}>
-      <div className={"bg-background border rounded-lg p-4 lg:border-0 lg:p-0"}>
-        <h2 className={"text-lg font-semibold text-foreground mb-4"}>
-          Filtros
-        </h2>
+    <div className={"sticky top-4"}>
+      <Card className={"shadow-none"}>
+        <CardHeader>
+          <CardTitle className={"text-lg"}>Filtros</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Accordion
+            className={"space-y-0"}
+            defaultValue={["benefit-type", "institution"]}
+            type={"multiple"}
+          >
+            <AccordionItem value={"institution"}>
+              <AccordionTrigger className={"text-sm font-medium py-3"}>
+                Institución
+              </AccordionTrigger>
+              <AccordionContent className={"pb-4"}>
+                <InstitutionFilter institutions={institutions} />
+              </AccordionContent>
+            </AccordionItem>
 
-        <div className={"space-y-6"}>
-          <div>
-            <h3 className={"text-sm font-medium text-foreground mb-3"}>
-              Institución
-            </h3>
-            <InstitutionFilter institutions={institutions} />
-          </div>
-
-          <div>
-            <h3 className={"text-sm font-medium text-foreground mb-3"}>
-              Tipo de Beneficio
-            </h3>
-            <BenefitTypeFilter />
-          </div>
-        </div>
-      </div>
+            <AccordionItem value={"benefit-type"}>
+              <AccordionTrigger className={"text-sm font-medium py-3"}>
+                Tipo de Beneficio
+              </AccordionTrigger>
+              <AccordionContent className={"pb-4"}>
+                <BenefitTypeFilter />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </CardContent>
+      </Card>
     </div>
   );
 }
