@@ -4,6 +4,7 @@ import { embed } from "ai";
 import { openai } from "@ai-sdk/openai";
 
 import { createClient } from "@/utils/supabase/server";
+import { getScholarships } from "@/lib/queries/scholarships";
 import {
   onboardingSchema,
   type OnboardingSchema,
@@ -16,6 +17,20 @@ import { translations } from "@/config/translations";
 import type { Tables } from "@/types/database";
 
 const defaultTranslations = translations["es"];
+
+export async function fetchMoreScholarships(
+  filters: {
+    benefits?: string[];
+    institutions?: string[];
+  },
+  page: number,
+) {
+  const result = await getScholarships(filters, page, 12);
+  return {
+    data: result.success ? result.data : [],
+    total: result.success ? result.total : 0,
+  };
+}
 
 export async function createMatchResultFeedback(
   matchResultId: number,

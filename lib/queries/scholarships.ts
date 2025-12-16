@@ -70,7 +70,7 @@ export async function getScholarships(
       query = query.overlaps("benefit_types", filters.benefits);
     }
 
-    const { data, error } = await query;
+    const { data, error, count } = await query;
 
     if (error) {
       console.error("Database error:", error.message);
@@ -80,6 +80,7 @@ export async function getScholarships(
     return {
       data: data,
       success: true,
+      total: count ?? 0,
     };
   } catch (error) {
     console.error(
@@ -90,6 +91,7 @@ export async function getScholarships(
       data: [],
       message: "An unexpected error occurred. Please try again later",
       success: false,
+      total: 0,
     };
   }
 }
