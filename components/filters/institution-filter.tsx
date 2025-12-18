@@ -3,18 +3,23 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import type { Institution } from "@/lib/queries/institutions";
 
 interface InstitutionFilterProps {
+  counts: Record<number, number>;
   institutions: Institution[];
 }
 
 const INITIAL_VISIBLE_COUNT = 5;
 
-export function InstitutionFilter({ institutions }: InstitutionFilterProps) {
+export function InstitutionFilter({
+  counts,
+  institutions,
+}: InstitutionFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showAll, setShowAll] = useState<boolean>(false);
@@ -78,10 +83,13 @@ export function InstitutionFilter({ institutions }: InstitutionFilterProps) {
               }
             />
             <Label
-              className={"text-sm font-normal cursor-pointer flex-1"}
+              className={
+                "text-sm font-normal cursor-pointer flex items-center gap-2 flex-1"
+              }
               htmlFor={`institution-${institution.id}`}
             >
-              {institution.name}
+              <span>{institution.name}</span>
+              <Badge variant={"secondary"}>{counts[institution.id]}</Badge>
             </Label>
           </div>
         );

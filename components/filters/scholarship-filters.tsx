@@ -8,10 +8,23 @@ import { BenefitTypeFilter } from "@/components/filters/benefit-type-filter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InstitutionFilter } from "@/components/filters/institution-filter";
 import { getInstitutions } from "@/lib/queries/institutions";
+import {
+  getScholarshipCountsByBenefit,
+  getScholarshipCountsByInstitution,
+} from "@/lib/queries/scholarships";
 
 export async function ScholarshipFilters() {
-  // Fetch institutions data
-  const institutions = await getInstitutions();
+  // Fetch institutions and counts in parallel
+  const [institutions, institutionCounts, benefitCounts] = await Promise.all([
+    getInstitutions(),
+    getScholarshipCountsByInstitution(),
+    getScholarshipCountsByBenefit(),
+  ]);
+
+  // Filter out institutions with zero scholarships
+  const institutionsWithScholarships = institutions.filter(
+    (inst) => institutionCounts[inst.id] > 0,
+  );
 
   return (
     <div className={"sticky top-4"}>
@@ -30,7 +43,10 @@ export async function ScholarshipFilters() {
                 Institución
               </AccordionTrigger>
               <AccordionContent className={"pb-4"}>
-                <InstitutionFilter institutions={institutions} />
+                <InstitutionFilter
+                  counts={institutionCounts}
+                  institutions={institutionsWithScholarships}
+                />
               </AccordionContent>
             </AccordionItem>
 
@@ -39,7 +55,7 @@ export async function ScholarshipFilters() {
                 Tipo de Beneficio
               </AccordionTrigger>
               <AccordionContent className={"pb-4"}>
-                <BenefitTypeFilter />
+                <BenefitTypeFilter counts={benefitCounts} />
               </AccordionContent>
             </AccordionItem>
           </Accordion>
