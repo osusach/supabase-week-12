@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+
+import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
@@ -11,7 +13,11 @@ const BENEFIT_TYPES = [
   { value: "other", label: "Otro" },
 ] as const;
 
-export function BenefitTypeFilter() {
+interface BenefitTypeFilterProps {
+  counts: Record<string, number>;
+}
+
+export function BenefitTypeFilter({ counts }: BenefitTypeFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -57,10 +63,13 @@ export function BenefitTypeFilter() {
               }
             />
             <Label
-              className={"text-sm font-normal cursor-pointer flex-1"}
+              className={
+                "text-sm font-normal cursor-pointer flex items-center gap-2 flex-1"
+              }
               htmlFor={`benefit-${benefit.value}`}
             >
-              {benefit.label}
+              <span>{benefit.label}</span>
+              <Badge variant={"secondary"}>{counts[benefit.value] || 0}</Badge>
             </Label>
           </div>
         );

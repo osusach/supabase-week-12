@@ -70,7 +70,7 @@ export async function getScholarships(
       query = query.overlaps("benefit_types", filters.benefits);
     }
 
-    const { data, error } = await query;
+    const { data, error, count } = await query;
 
     if (error) {
       console.error("Database error:", error.message);
@@ -80,6 +80,7 @@ export async function getScholarships(
     return {
       data: data,
       success: true,
+      total: count ?? 0,
     };
   } catch (error) {
     console.error(
@@ -90,6 +91,92 @@ export async function getScholarships(
       data: [],
       message: "An unexpected error occurred. Please try again later",
       success: false,
+      total: 0,
     };
+  }
+}
+
+/**
+ * Get scholarship counts grouped by benefit type
+ * @returns Record mapping benefit type to scholarship count
+ */
+export async function getScholarshipCountsByBenefit(): Promise<
+  Record<string, number>
+> {
+  const supabase = await createClient();
+
+  try {
+    const { data, error } = await supabase
+      .from("scholarships")
+      .select("benefit_types");
+
+    if (error) {
+      console.error("Database error:", error.message);
+      throw new Error("Error fetching scholarship benefit counts.");
+    }
+
+    // Initialize counts for all benefit types
+    const counts: Record<string, number> = {
+      tuition: 0,
+      housing: 0,
+      maintenance: 0,
+      other: 0,
+    };
+
+    // Count each benefit type occurrence
+    data?.forEach((scholarship) => {
+      scholarship.benefit_types.forEach((type) => {
+        if (type in counts) {
+          counts[type] = counts[type] + 1;
+        }
+      });
+    });
+
+    return counts;
+  } catch (error) {
+    console.error(
+      "Server error:",
+      error instanceof Error ? error.message : error,
+    );
+    return {};
+  }
+}
+
+/**
+ * Get scholarship counts grouped by institution
+ * @returns Record mapping institution ID to scholarship count
+ */
+export async function getScholarshipCountsByInstitution(): Promise<
+  Record<number, number>
+> {
+  const supabase = await createClient();
+
+  try {
+    const { data, error } = await supabase
+      .from("scholarships")
+      .select("institution_id");
+
+    if (error) {
+      console.error("Database error:", error.message);
+      throw new Error("Error fetching scholarship counts by institution.");
+    }
+
+    // Aggregate counts by institution_id
+    const counts = data?.reduce(
+      (acc, scholarship) => {
+        const id = scholarship.institution_id;
+        acc[id] = (acc[id] || 0) + 1;
+        return acc;
+      },
+      {} as Record<number, number>,
+    );
+
+    return counts || {};
+  } catch (error) {
+    console.error(
+      "Server error:",
+      error instanceof Error ? error.message : error,
+    );
+    return {};
   }
 }

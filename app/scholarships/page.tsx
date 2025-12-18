@@ -1,9 +1,9 @@
 import { getScholarships } from "@/lib/queries/scholarships";
 
-import { ScholarshipFilters } from "@/components/filters/scholarship-filters";
-import { DirectoryScholarshipCard } from "@/components/directory-scholarship-card";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { InfiniteScholarshipsList } from "@/components/infinite-scholarships-list";
+import { ScholarshipFilters } from "@/components/filters/scholarship-filters";
 
 interface ScholarshipsPageProps {
   searchParams: Promise<{
@@ -21,14 +21,18 @@ export default async function ScholarshipsPage({
   const selectedInstitutions = params.institutions?.split(",") || [];
   const selectedBenefits = params.benefits?.split(",") || [];
 
-  // Fetch scholarships data
-  const result = await getScholarships({
+  // Prepare filters object
+  const filters = {
+    benefits: selectedBenefits.length > 0 ? selectedBenefits : undefined,
     institutions:
       selectedInstitutions.length > 0 ? selectedInstitutions : undefined,
-    benefits: selectedBenefits.length > 0 ? selectedBenefits : undefined,
-  });
+  };
+
+  // Fetch initial scholarships data (first page)
+  const result = await getScholarships(filters, 1, 12);
 
   const scholarships = result.success ? result.data : [];
+  const total = result.success ? result.total : 0;
 
   return (
     <div className={"min-h-screen flex flex-col"}>
@@ -73,44 +77,11 @@ export default async function ScholarshipsPage({
             </aside>
             {/* Scholarships Grid */}
             <div className={"lg:col-span-3"}>
-              <div className={"mb-6"}>
-                <p className={"text-sm text-muted-foreground"}>
-                  {scholarships.length}{" "}
-                  {scholarships.length === 1
-                    ? "beca encontrada"
-                    : "becas encontradas"}
-                </p>
-              </div>
-
-              {scholarships.length > 0 ? (
-                <div
-                  className={
-                    "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6"
-                  }
-                >
-                  {scholarships.map((scholarship) => (
-                    <DirectoryScholarshipCard
-                      key={scholarship.id}
-                      scholarship={scholarship}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div
-                  className={
-                    "flex flex-col items-center justify-center text-center py-16 px-4"
-                  }
-                >
-                  <div className={"max-w-md"}>
-                    <p className={"text-lg font-medium text-foreground mb-2"}>
-                      No se encontraron becas
-                    </p>
-                    <p className={"text-sm text-muted-foreground"}>
-                      Intenta ajustar los filtros para ver más resultados.
-                    </p>
-                  </div>
-                </div>
-              )}
+              <InfiniteScholarshipsList
+                initialScholarships={scholarships}
+                initialTotal={total}
+                filters={filters}
+              />
             </div>
           </div>
         </div>
