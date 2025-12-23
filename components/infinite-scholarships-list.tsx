@@ -30,7 +30,12 @@ export function InfiniteScholarshipsList({
     useState<Scholarship[]>(initialScholarships);
   const [total, setTotal] = useState<number>(initialTotal);
 
-  const { ref, inView } = useInView({
+  const { ref } = useInView({
+    onChange: (inView) => {
+      if (inView && hasMore && !isLoading) {
+        loadMore();
+      }
+    },
     rootMargin: "100px",
     threshold: 0,
   });
@@ -42,13 +47,6 @@ export function InfiniteScholarshipsList({
     setScholarships(initialScholarships);
     setTotal(initialTotal);
   }, [initialScholarships, initialTotal]);
-
-  // Load more when scrolling to bottom
-  useEffect(() => {
-    if (inView && hasMore && !isLoading) {
-      loadMore();
-    }
-  }, [, hasMore, isLoading, inView]);
 
   const loadMore = async () => {
     setIsLoading(true);
