@@ -26,6 +26,12 @@ export async function ScholarshipFilters() {
     (inst) => institutionCounts[inst.id] > 0,
   );
 
+  // Calculate total scholarships (sum of institution counts since each scholarship belongs to one institution)
+  const totalScholarships = Object.values(institutionCounts).reduce(
+    (sum, count) => sum + count,
+    0,
+  );
+
   return (
     <div className={"sticky top-4"}>
       <Card className={"shadow-none"}>
@@ -46,6 +52,7 @@ export async function ScholarshipFilters() {
                 <InstitutionFilter
                   counts={institutionCounts}
                   institutions={institutionsWithScholarships}
+                  totalScholarships={totalScholarships}
                 />
               </AccordionContent>
             </AccordionItem>
@@ -55,7 +62,10 @@ export async function ScholarshipFilters() {
                 Tipo de Beneficio
               </AccordionTrigger>
               <AccordionContent className={"pb-4"}>
-                <BenefitTypeFilter counts={benefitCounts} />
+                <BenefitTypeFilter
+                  counts={benefitCounts}
+                  totalScholarships={totalScholarships}
+                />
               </AccordionContent>
             </AccordionItem>
           </Accordion>
