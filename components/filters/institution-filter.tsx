@@ -12,6 +12,7 @@ import type { Institution } from "@/lib/queries/institutions";
 interface InstitutionFilterProps {
   counts: Record<number, number>;
   institutions: Institution[];
+  totalScholarships: number;
 }
 
 const INITIAL_VISIBLE_COUNT = 5;
@@ -19,6 +20,7 @@ const INITIAL_VISIBLE_COUNT = 5;
 export function InstitutionFilter({
   counts,
   institutions,
+  totalScholarships,
 }: InstitutionFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -27,6 +29,18 @@ export function InstitutionFilter({
   // Get currently selected institutions from URL
   const selectedInstitutions =
     searchParams.get("institutions")?.split(",") || [];
+
+  // "All institutions" is selected when no specific institutions are selected
+  const isAllSelected = selectedInstitutions.length === 0;
+
+  const handleAllInstitutionsChange = (checked: boolean) => {
+    if (checked) {
+      // Clear all institution selections to show all
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("institutions");
+      router.push(`/scholarships?${params.toString()}`, { scroll: false });
+    }
+  };
 
   const handleInstitutionChange = (institutionId: string, checked: boolean) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -69,6 +83,26 @@ export function InstitutionFilter({
 
   return (
     <div className={"space-y-3"}>
+      {/* All Institutions checkbox */}
+      <div className={"flex items-center space-x-2"}>
+        <Checkbox
+          checked={isAllSelected}
+          id={"institution-all"}
+          onCheckedChange={(checked) =>
+            handleAllInstitutionsChange(checked === true)
+          }
+        />
+        <Label
+          className={
+            "text-sm font-normal cursor-pointer flex items-center gap-2 flex-1"
+          }
+          htmlFor={"institution-all"}
+        >
+          <span>Todas las instituciones</span>
+          <Badge variant={"secondary"}>{totalScholarships}</Badge>
+        </Label>
+      </div>
+
       {visibleInstitutions.map((institution) => {
         const institutionIdStr = institution.id.toString();
         const isChecked = selectedInstitutions.includes(institutionIdStr);
