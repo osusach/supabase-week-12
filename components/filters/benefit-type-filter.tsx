@@ -15,14 +15,30 @@ const BENEFIT_TYPES = [
 
 interface BenefitTypeFilterProps {
   counts: Record<string, number>;
+  totalScholarships: number;
 }
 
-export function BenefitTypeFilter({ counts }: BenefitTypeFilterProps) {
+export function BenefitTypeFilter({
+  counts,
+  totalScholarships,
+}: BenefitTypeFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   // Get currently selected benefit types from URL
   const selectedBenefits = searchParams.get("benefits")?.split(",") || [];
+
+  // "All benefits" is selected when no specific benefits are selected
+  const isAllSelected = selectedBenefits.length === 0;
+
+  const handleAllBenefitsChange = (checked: boolean) => {
+    if (checked) {
+      // Clear all benefit selections to show all
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("benefits");
+      router.push(`/scholarships?${params.toString()}`, { scroll: false });
+    }
+  };
 
   const handleBenefitChange = (benefitValue: string, checked: boolean) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -50,6 +66,26 @@ export function BenefitTypeFilter({ counts }: BenefitTypeFilterProps) {
 
   return (
     <div className={"space-y-3"}>
+      {/* All Benefits checkbox */}
+      <div className={"flex items-center space-x-2"}>
+        <Checkbox
+          checked={isAllSelected}
+          id={"benefit-all"}
+          onCheckedChange={(checked) =>
+            handleAllBenefitsChange(checked === true)
+          }
+        />
+        <Label
+          className={
+            "text-sm font-normal cursor-pointer flex items-center gap-2 flex-1"
+          }
+          htmlFor={"benefit-all"}
+        >
+          <span>Todos los tipos</span>
+          <Badge variant={"secondary"}>{totalScholarships}</Badge>
+        </Label>
+      </div>
+
       {BENEFIT_TYPES.map((benefit) => {
         const isChecked = selectedBenefits.includes(benefit.value);
 
