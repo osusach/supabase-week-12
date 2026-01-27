@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import { Onboarding } from "@/components/onboarding";
 import { SignOutButton } from "@/components/buttons";
+import { Onboarding } from "@/components/onboarding";
 import { fetchFormOptions, fetchOnboardingMatch } from "@/lib/data";
 
 export const metadata: Metadata = {
