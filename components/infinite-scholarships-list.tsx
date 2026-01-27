@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 
-import { DirectoryScholarshipCard } from "@/components/directory-scholarship-card";
 import { fetchMoreScholarships } from "@/actions/scholarships";
+import { DirectoryScholarshipCard } from "@/components/directory-scholarship-card";
 import type { Scholarship } from "@/lib/queries/scholarships";
 
 interface InfiniteScholarshipsListProps {

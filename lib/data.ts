@@ -1,6 +1,6 @@
-import { createClient } from "@/utils/supabase/server";
 import type { MatchResult } from "@/actions/scholarships";
 import type { Json, Tables } from "@/types/database";
+import { createClient } from "@/utils/supabase/server";
 
 export type City = Pick<Tables<"cities">, "id" | "name" | "state_id">;
 

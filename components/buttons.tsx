@@ -2,8 +2,8 @@
 
 import { LogOutIcon } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { signOut } from "@/actions/auth";
+import { Button } from "@/components/ui/button";
 
 function SignOutButton() {
   const handleClick = async () => {

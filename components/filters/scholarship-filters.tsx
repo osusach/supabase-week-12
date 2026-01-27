@@ -1,12 +1,12 @@
+import { BenefitTypeFilter } from "@/components/filters/benefit-type-filter";
+import { InstitutionFilter } from "@/components/filters/institution-filter";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { BenefitTypeFilter } from "@/components/filters/benefit-type-filter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { InstitutionFilter } from "@/components/filters/institution-filter";
 import { getInstitutions } from "@/lib/queries/institutions";
 import {
   getScholarshipCountsByBenefit,

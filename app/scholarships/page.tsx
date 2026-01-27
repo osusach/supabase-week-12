@@ -1,9 +1,8 @@
-import { getScholarships } from "@/lib/queries/scholarships";
-
+import { ScholarshipFilters } from "@/components/filters/scholarship-filters";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { InfiniteScholarshipsList } from "@/components/infinite-scholarships-list";
-import { ScholarshipFilters } from "@/components/filters/scholarship-filters";
+import { getScholarships } from "@/lib/queries/scholarships";
 
 interface ScholarshipsPageProps {
   searchParams: Promise<{

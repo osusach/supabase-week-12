@@ -3,8 +3,8 @@
 import Image from "next/image";
 import { use } from "react";
 
-import { Button } from "@/components/ui/button";
 import { signInWithGoogle } from "@/actions/auth";
+import { Button } from "@/components/ui/button";
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 

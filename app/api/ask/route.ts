@@ -1,15 +1,15 @@
+import { toUIMessageStream } from "@ai-sdk/langchain";
+import type { Document } from "@langchain/core/documents";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
-import { ChatOpenAI } from "@langchain/openai";
-import { NextRequest } from "next/server";
+import { StringOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
 import {
   RunnablePassthrough,
   RunnableSequence,
 } from "@langchain/core/runnables";
-import { StringOutputParser } from "@langchain/core/output_parsers";
+import { ChatOpenAI } from "@langchain/openai";
 import { createUIMessageStreamResponse, type UIMessage } from "ai";
-import { toUIMessageStream } from "@ai-sdk/langchain";
-import type { Document } from "@langchain/core/documents";
+import { NextRequest } from "next/server";
 
 import { selfQueryRetriever } from "@/utils/supabase/vector-store";
 
