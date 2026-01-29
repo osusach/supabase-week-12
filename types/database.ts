@@ -433,6 +433,7 @@ export type Database = {
           institution_id: number;
           name: string;
           overview: string;
+          study_levels: Database["public"]["Enums"]["study_level_type"][];
           updated_at: string | null;
           url: string;
         };
@@ -443,6 +444,7 @@ export type Database = {
           institution_id: number;
           name: string;
           overview: string;
+          study_levels?: Database["public"]["Enums"]["study_level_type"][];
           updated_at?: string | null;
           url: string;
         };
@@ -453,6 +455,7 @@ export type Database = {
           institution_id?: number;
           name?: string;
           overview?: string;
+          study_levels?: Database["public"]["Enums"]["study_level_type"][];
           updated_at?: string | null;
           url?: string;
         };
@@ -577,6 +580,7 @@ export type Database = {
       institution_funding_type: "public" | "private" | "mixed" | "other";
       onboarding_status_type: "not_started" | "in_progress" | "completed";
       scholarship_category: "complementary" | "tuition" | "other";
+      study_level_type: "undergraduate" | "graduate";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -726,6 +730,7 @@ export const Constants = {
       institution_funding_type: ["public", "private", "mixed", "other"],
       onboarding_status_type: ["not_started", "in_progress", "completed"],
       scholarship_category: ["complementary", "tuition", "other"],
+      study_level_type: ["undergraduate", "graduate"],
     },
   },
 } as const;

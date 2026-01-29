@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import { Header } from "@/components/header";
 import { ChatWindow } from "@/components/chat-window";
+import { Header } from "@/components/header";
 
 export const metadata: Metadata = {
   description:

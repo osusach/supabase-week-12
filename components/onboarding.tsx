@@ -1,5 +1,14 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  format,
+  getMonth,
+  getYear,
+  parseISO,
+  setMonth,
+  setYear,
+} from "date-fns";
 import {
   CalendarIcon,
   ChevronLeftIcon,
@@ -9,18 +18,11 @@ import {
   RocketIcon,
   UserIcon,
 } from "lucide-react";
-import {
-  format,
-  getMonth,
-  getYear,
-  parseISO,
-  setMonth,
-  setYear,
-} from "date-fns";
-import { useForm } from "react-hook-form";
 import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
+import { matchScholarships, type MatchResult } from "@/actions/scholarships";
+import { MatchFeedback } from "@/components/match-feedback";
 import ScholarshipCard from "@/components/scholarship-card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -42,7 +44,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { MatchFeedback } from "@/components/match-feedback";
 import {
   Popover,
   PopoverContent,
@@ -63,11 +64,6 @@ import {
   graduationYears,
   months,
 } from "@/config/form-options";
-import { matchScholarships, type MatchResult } from "@/actions/scholarships";
-import {
-  onboardingSchema,
-  type OnboardingSchema,
-} from "@/lib/schemas/onboarding-schema";
 import type {
   City,
   Country,
@@ -76,6 +72,10 @@ import type {
   OnboardingProfile,
   State,
 } from "@/lib/data";
+import {
+  onboardingSchema,
+  type OnboardingSchema,
+} from "@/lib/schemas/onboarding-schema";
 import { cn } from "@/lib/utils";
 
 const onboardingSteps = [

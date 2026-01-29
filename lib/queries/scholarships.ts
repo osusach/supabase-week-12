@@ -21,8 +21,9 @@ export type Scholarship = {
  */
 export async function getScholarships(
   filters?: {
-    institutions?: string[];
     benefits?: string[];
+    institutions?: string[];
+    studyLevels?: string[];
   },
   page: number = 1,
   pageSize: number = 12,
@@ -68,6 +69,11 @@ export async function getScholarships(
     // Filter by benefit types if provided
     if (filters?.benefits && filters.benefits.length > 0) {
       query = query.overlaps("benefit_types", filters.benefits);
+    }
+
+    // Filter by study levels if provided
+    if (filters?.studyLevels && filters.studyLevels.length > 0) {
+      query = query.overlaps("study_levels", filters.studyLevels);
     }
 
     const { data, error, count } = await query;
@@ -172,6 +178,50 @@ export async function getScholarshipCountsByInstitution(): Promise<
     );
 
     return counts || {};
+  } catch (error) {
+    console.error(
+      "Server error:",
+      error instanceof Error ? error.message : error,
+    );
+    return {};
+  }
+}
+
+/**
+ * Get scholarship counts grouped by study level
+ * @returns Record mapping study level to scholarship count
+ */
+export async function getScholarshipCountsByStudyLevel(): Promise<
+  Record<string, number>
+> {
+  const supabase = await createClient();
+
+  try {
+    const { data, error } = await supabase
+      .from("scholarships")
+      .select("study_levels");
+
+    if (error) {
+      console.error("Database error:", error.message);
+      throw new Error("Error fetching scholarship study level counts.");
+    }
+
+    // Initialize counts for all study levels
+    const counts: Record<string, number> = {
+      undergraduate: 0,
+      graduate: 0,
+    };
+
+    // Count each study level occurrence
+    data?.forEach((scholarship) => {
+      scholarship.study_levels.forEach((level) => {
+        if (level in counts) {
+          counts[level] = counts[level] + 1;
+        }
+      });
+    });
+
+    return counts;
   } catch (error) {
     console.error(
       "Server error:",

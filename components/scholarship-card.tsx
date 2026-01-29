@@ -3,9 +3,9 @@
 import { SquareArrowOutUpRightIcon } from "lucide-react";
 import { useState } from "react";
 
+import type { MatchScholarship } from "@/actions/scholarships";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { MatchScholarship } from "@/actions/scholarships";
 
 interface ScholarshipCardProps {
   scholarship: MatchScholarship;
