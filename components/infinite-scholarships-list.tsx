@@ -9,8 +9,9 @@ import type { Scholarship } from "@/lib/queries/scholarships";
 
 interface InfiniteScholarshipsListProps {
   filters: {
-    institutions?: string[];
     benefits?: string[];
+    institutions?: string[];
+    studyLevels?: string[];
   };
   initialScholarships: Scholarship[];
   initialTotal: number;

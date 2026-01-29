@@ -6,8 +6,9 @@ import { getScholarships } from "@/lib/queries/scholarships";
 
 interface ScholarshipsPageProps {
   searchParams: Promise<{
-    institutions?: string;
     benefits?: string;
+    institutions?: string;
+    study_levels?: string;
   }>;
 }
 
@@ -17,14 +18,17 @@ export default async function ScholarshipsPage({
   const params = await searchParams;
 
   // Parse filter parameters from URL
-  const selectedInstitutions = params.institutions?.split(",") || [];
   const selectedBenefits = params.benefits?.split(",") || [];
+  const selectedInstitutions = params.institutions?.split(",") || [];
+  const selectedStudyLevels = params.study_levels?.split(",") || [];
 
   // Prepare filters object
   const filters = {
     benefits: selectedBenefits.length > 0 ? selectedBenefits : undefined,
     institutions:
       selectedInstitutions.length > 0 ? selectedInstitutions : undefined,
+    studyLevels:
+      selectedStudyLevels.length > 0 ? selectedStudyLevels : undefined,
   };
 
   // Fetch initial scholarships data (first page)
