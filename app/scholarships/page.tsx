@@ -1,4 +1,5 @@
 import { ScholarshipFilters } from "@/components/filters/scholarship-filters";
+import { SearchFilter } from "@/components/filters/search-filter";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { InfiniteScholarshipsList } from "@/components/infinite-scholarships-list";
@@ -8,6 +9,7 @@ interface ScholarshipsPageProps {
   searchParams: Promise<{
     benefits?: string;
     institutions?: string;
+    search?: string;
     study_levels?: string;
   }>;
 }
@@ -18,6 +20,7 @@ export default async function ScholarshipsPage({
   const params = await searchParams;
 
   // Parse filter parameters from URL
+  const searchQuery = params.search || undefined;
   const selectedBenefits = params.benefits?.split(",") || [];
   const selectedInstitutions = params.institutions?.split(",") || [];
   const selectedStudyLevels = params.study_levels?.split(",") || [];
@@ -27,6 +30,7 @@ export default async function ScholarshipsPage({
     benefits: selectedBenefits.length > 0 ? selectedBenefits : undefined,
     institutions:
       selectedInstitutions.length > 0 ? selectedInstitutions : undefined,
+    search: searchQuery,
     studyLevels:
       selectedStudyLevels.length > 0 ? selectedStudyLevels : undefined,
   };
@@ -80,6 +84,11 @@ export default async function ScholarshipsPage({
             </aside>
             {/* Scholarships Grid */}
             <div className={"lg:col-span-3"}>
+              {/* Search Bar */}
+              <div className={"mb-6"}>
+                <SearchFilter />
+              </div>
+
               <InfiniteScholarshipsList
                 initialScholarships={scholarships}
                 initialTotal={total}

@@ -22,6 +22,7 @@ export async function fetchMoreScholarships(
   filters: {
     benefits?: string[];
     institutions?: string[];
+    search?: string;
     studyLevels?: string[];
   },
   page: number,
