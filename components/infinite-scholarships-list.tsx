@@ -11,6 +11,7 @@ interface InfiniteScholarshipsListProps {
   filters: {
     benefits?: string[];
     institutions?: string[];
+    search?: string;
     studyLevels?: string[];
   };
   initialScholarships: Scholarship[];
@@ -70,8 +71,8 @@ export function InfiniteScholarshipsList({
       {scholarships.length > 0 && (
         <div className={"mb-6"}>
           <p className={"text-sm text-muted-foreground"}>
-            {scholarships.length} de {total}{" "}
-            {total === 1 ? "beca encontrada" : "becas encontradas"}
+            Mostrando {scholarships.length} de {total}{" "}
+            {total === 1 ? "beca" : "becas"}
           </p>
         </div>
       )}

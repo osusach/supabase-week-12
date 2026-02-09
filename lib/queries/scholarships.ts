@@ -23,6 +23,7 @@ export async function getScholarships(
   filters?: {
     benefits?: string[];
     institutions?: string[];
+    search?: string;
     studyLevels?: string[];
   },
   page: number = 1,
@@ -74,6 +75,12 @@ export async function getScholarships(
     // Filter by study levels if provided
     if (filters?.studyLevels && filters.studyLevels.length > 0) {
       query = query.overlaps("study_levels", filters.studyLevels);
+    }
+
+    // Filter by search text if provided
+    if (filters?.search && filters.search.trim().length > 0) {
+      const searchTerm = `%${filters.search.trim()}%`;
+      query = query.or(`name.ilike.${searchTerm},overview.ilike.${searchTerm}`);
     }
 
     const { data, error, count } = await query;
